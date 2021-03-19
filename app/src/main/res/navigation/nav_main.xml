@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/style_list_fragment">
+
+    <fragment
+        android:id="@+id/style_list_fragment"
+        android:name="ai.folded.fitstyle.StyleListFragment"
+        android:label="@string/select_style_title"
+        tools:layout="@layout/fragment_style_list">
+
+        <action
+            android:id="@+id/action_style_list_to_upload_fragment"
+            app:destination="@id/upload_photo_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/upload_photo_fragment"
+        android:name="ai.folded.fitstyle.UploadPhotoFragment"
+        android:label="@string/upload_photo"
+        tools:layout="@layout/fragment_upload_photo">
+
+        <argument
+            android:name="styleOptions"
+            app:argType="ai.folded.fitstyle.data.StyleOptions" />
+
+        <action
+            android:id="@+id/action_upload_photo_to_style_transfer_fragment"
+            app:destination="@id/style_transfer_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/style_transfer_fragment"
+        android:name="ai.folded.fitstyle.StyleTransferFragment"
+        tools:layout="@layout/fragment_style_transfer">
+
+        <argument
+            android:name="styleOptions"
+            app:argType="ai.folded.fitstyle.data.StyleOptions" />
+
+        <action
+            android:id="@+id/action_style_transfer_to_style_result_fragment"
+            app:destination="@id/style_result_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/style_result_fragment"
+        android:name="ai.folded.fitstyle.StyleResultFragment"
+        tools:layout="@layout/fragment_style_result">
+    </fragment>
+
+
+</navigation>
