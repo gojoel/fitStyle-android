@@ -7,9 +7,11 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.google.gson.stream.JsonReader
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+
 import kotlinx.coroutines.coroutineScope
 
 class SeedDatabaseWorker(
@@ -18,15 +20,18 @@ class SeedDatabaseWorker(
 ) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result = coroutineScope {
         try {
-            applicationContext.assets.open(STYLE_IMAGES_FILENAME).use { inputStream ->
-                JsonReader(inputStream.reader()).use { jsonReader ->
-                    val type = object : TypeToken<List<StyleImage>>() {}.type
-                    val styleList: List<StyleImage> = Gson().fromJson(jsonReader, type)
+            val moshi = Moshi.Builder()
+                .add(KotlinJsonAdapterFactory())
+                .build()
 
-                    val database = AppDatabase.getInstance(applicationContext)
-                    database.styleImageDao().insertAll(styleList)
-                }
-            }
+            val listType = Types.newParameterizedType(List::class.java, StyleImage::class.java)
+            val adapter: JsonAdapter<List<StyleImage>> = moshi.adapter(listType)
+
+            val json = applicationContext.assets.open(STYLE_IMAGES_FILENAME).bufferedReader().use{ it.readText()}
+            val styleList : List<StyleImage>? = adapter.fromJson(json)
+
+            val database = AppDatabase.getInstance(applicationContext)
+            database.styleImageDao().insertAll(styleList ?: emptyList())
 
             Result.success()
         } catch (ex: Exception) {

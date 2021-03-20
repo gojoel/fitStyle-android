@@ -18,5 +18,5 @@ interface StyleImageDao {
     fun getStyle(imageId: Int): LiveData<StyleImage>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(plants: List<StyleImage>)
+    suspend fun insertAll(images: List<StyleImage>)
 }

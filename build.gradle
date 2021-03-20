@@ -15,7 +15,7 @@ buildscript {
         fragmentVersion = '1.3.0'
         glideVersion = '4.10.0'
         gradleVersion = '4.1.2'
-        gsonVersion = '2.8.2'
+        version_moshi = "1.9.3"
         hiltVersion = '2.31.2-alpha'
         junitVersion = '4.12'
         kotlinVersion = '1.4.30'
@@ -36,7 +36,7 @@ buildscript {
         viewPagerVersion = '1.0.0'
         workVersion = '2.1.0'
         kotlin_version = '1.3.72'
-        lottie_version = '3.4.0'
+        moshiVersion = "1.9.3"
     }
 
     repositories {
