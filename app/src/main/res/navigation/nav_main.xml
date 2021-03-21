@@ -60,6 +60,10 @@
         android:id="@+id/style_result_fragment"
         android:name="ai.folded.fitstyle.StyleResultFragment"
         tools:layout="@layout/fragment_style_result">
+
+        <argument
+            android:name="result"
+            app:argType="ai.folded.fitstyle.api.ResultImage" />
     </fragment>
 
 

@@ -1,18 +1,30 @@
 package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.FragmentStyleResultBinding
+import ai.folded.fitstyle.viewmodels.StyleResultViewModel
+import ai.folded.fitstyle.viewmodels.StyleResultViewModelFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StyleResultFragment: Fragment() {
+
+    private val args: StyleResultFragmentArgs by navArgs()
+
+    @Inject
+    lateinit var styleResultViewModelFactory: StyleResultViewModelFactory
+
+    private val styleResultViewModel: StyleResultViewModel by viewModels {
+        StyleResultViewModel.provideFactory(styleResultViewModelFactory, args.result)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -22,20 +34,14 @@ class StyleResultFragment: Fragment() {
 
         val binding = FragmentStyleResultBinding.inflate(inflater, container, false)
             .apply {
+                viewModel = styleResultViewModel
                 lifecycleOwner = viewLifecycleOwner
             }
 
-        binding.toolbar.setTitle("Result")
+        binding.toolbar.setTitle(R.string.style_result_title)
         binding.toolbar.setNavigationOnClickListener { view ->
             view.findNavController().navigateUp()
         }
-
-        Glide.with(this)
-            .load("https://cdn.shopify.com/s/files/1/0267/6834/3122/articles/7-reasons-why-you-should-stop-using-watermarks-now-525024_3024x.jpg?v=1599125023")
-            .transition(DrawableTransitionOptions.withCrossFade())
-            .into(binding.resultImageView)
-
-
 
         return binding.root
 

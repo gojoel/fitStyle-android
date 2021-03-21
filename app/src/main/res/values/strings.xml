@@ -11,4 +11,6 @@
     <string name="apply_style_title">Styling</string>
     <string name="style_almost_done">Almost done!</string>
     <string name="style_transfer_details">Applying the style to your photo. This will only take a few seconds…</string>
+
+    <string name="style_result_title">Result</string>
 </resources>
