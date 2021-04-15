@@ -1,7 +1,6 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.data.StyleImage
-import ai.folded.fitstyle.data.StyleImageRepository
 import ai.folded.fitstyle.utils.BUCKET_PUBLIC_PREFIX
 import ai.folded.fitstyle.utils.STYLE_IMAGES_PATH
 import androidx.lifecycle.LiveData
@@ -20,7 +19,6 @@ import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class StyleListViewModel @Inject internal constructor(
-    styleImageRepository: StyleImageRepository
 ) : ViewModel() {
 
     private val _images = MutableLiveData<List<StyleImage>>()
