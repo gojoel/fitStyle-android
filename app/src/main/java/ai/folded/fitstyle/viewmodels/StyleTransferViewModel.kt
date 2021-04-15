@@ -3,6 +3,7 @@ package ai.folded.fitstyle.viewmodels
 import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.api.ResultImage
 import ai.folded.fitstyle.data.StyleOptions
+import ai.folded.fitstyle.utils.AwsUtils
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -10,16 +11,23 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
+import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
+import com.amplifyframework.auth.result.AuthSessionResult
+import com.amplifyframework.core.Amplify
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 /**
@@ -41,8 +49,9 @@ class StyleTransferViewModel @AssistedInject constructor(
 
     private fun styleTransfer() {
         viewModelScope.launch {
+            val userId = getUserId()
             try {
-                callStyleTransfer()
+                callStyleTransfer(userId)
             } catch (e: Exception) {
                 // TODO: handle and log error
                 Toast.makeText(getApplication(), e.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -50,21 +59,53 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun callStyleTransfer() = withContext(Dispatchers.IO) {
+    private suspend fun getUserId() : String {
+        return suspendCoroutine {continuation ->
+            Amplify.Auth.fetchAuthSession(
+                {
+                    val session = it as AWSCognitoAuthSession
+                    when (session.identityId.type) {
+
+                        AuthSessionResult.Type.SUCCESS -> {
+                            continuation.resume(session.identityId.value ?: "")
+                        }
+                        AuthSessionResult.Type.FAILURE -> {
+                            //  TODO: log failure to retrieve identity id
+                            continuation.resume("")
+                        }
+                    }
+                },
+                {
+                    // TODO: log failure to fetch session
+                }
+            )
+        }
+    }
+
+    private suspend fun callStyleTransfer(userId: String) = withContext(Dispatchers.IO) {
         val photoBitmap = getBitmapFromUri(styleOptions.photoUri)
         val styleBitmap = getBitmapFromUri(styleOptions.customStyleUri)
 
         val encodedPhoto = if (photoBitmap != null) convertBitmap(photoBitmap) else ""
-        val encodedCustomStyle = if (styleBitmap != null) convertBitmap(styleBitmap) else ""
+        if (encodedPhoto.isEmpty()) {
+            // TODO: handle error
+            cancel()
+        }
 
-        if (encodedPhoto.isNotEmpty() && (encodedCustomStyle.isNotEmpty() || styleOptions.styleImage != null)) {
-            val result = FitStyleApi.retrofitService.styleTransfer(encodedPhoto,
-                encodedCustomStyle,
-                styleOptions.styleImage?.id)
+        val encodedCustomStyle = if (styleBitmap != null) convertBitmap(styleBitmap) else null
+        if (encodedCustomStyle.isNullOrEmpty() && styleOptions.styleImage?.key.isNullOrEmpty()) {
+            // TODO: handle error
+            cancel()
+        }
 
-            withContext(Dispatchers.Main) {
-                _response.value = result
-            }
+        val result = FitStyleApi.retrofitService.styleTransfer(
+            userId,
+            encodedPhoto,
+            encodedCustomStyle,
+            styleOptions.styleImage?.imageName())
+
+        withContext(Dispatchers.Main) {
+            _response.value = result
         }
     }
 
@@ -95,8 +136,11 @@ class StyleTransferViewModel @AssistedInject constructor(
     }
 
     fun getStyleImage() : String {
-        val url: String? = styleOptions.customStyleUri?.toString() ?: styleOptions.styleImage?.imageUrl
-        return url ?: ""
+        return styleOptions.styleImage?.let {
+            AwsUtils.generateUrl(it.key)?.toString() ?: ""
+        } ?: run {
+            styleOptions.customStyleUri?.toString() ?: ""
+        }
     }
 
     companion object {

@@ -3,21 +3,16 @@ package ai.folded.fitstyle
 import ai.folded.fitstyle.databinding.FragmentStyleTransferBinding
 import ai.folded.fitstyle.viewmodels.StyleTransferViewModel
 import ai.folded.fitstyle.viewmodels.StyleTransferViewModelFactory
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.FutureTarget
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

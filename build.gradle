@@ -37,6 +37,7 @@ buildscript {
         workVersion = '2.1.0'
         kotlin_version = '1.3.72'
         moshiVersion = "1.9.3"
+        amplifyVersion = '1.17.1'
     }
 
     repositories {

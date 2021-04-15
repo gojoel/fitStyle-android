@@ -11,7 +11,11 @@ import kotlinx.android.parcel.Parcelize
 @Entity(tableName = "style_images")
 @Parcelize
 data class StyleImage(
-    @PrimaryKey @ColumnInfo(name = "id")
-    val id: Int,
-    val imageUrl: String = ""
-) : Parcelable
+    @PrimaryKey @ColumnInfo(name = "key")
+    val key: String = ""
+) : Parcelable {
+    fun imageName() : String {
+        val values = key.split("/")
+        return if (values.isNotEmpty()) values[values.size - 1] else ""
+    }
+}

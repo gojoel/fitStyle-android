@@ -7,6 +7,9 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
 }
 
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 android {
     compileSdkVersion rootProject.compileSdkVersion
     buildFeatures {
@@ -30,9 +33,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle-dev\""
+            buildConfigField "String", "BASE_URL", localProperties['BASE_URL_DEV']
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle\""
+            buildConfigField "String", "BASE_URL", localProperties['BASE_URL_PROD']
         }
     }
 
@@ -80,6 +91,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutinesVersion"
     implementation "com.google.dagger:hilt-android:$rootProject.hiltVersion"
+    implementation "com.amplifyframework:core:$rootProject.amplifyVersion"
+    implementation "com.amplifyframework:aws-auth-cognito:$rootProject.amplifyVersion"
+    implementation "com.amplifyframework:aws-storage-s3:$rootProject.amplifyVersion"
 
     // Testing dependencies
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"

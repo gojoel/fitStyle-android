@@ -72,7 +72,7 @@ class StyleListFragment: Fragment() {
     }
 
     private fun subscribeUi(adapter: StyleListAdapter) {
-        styleViewModel.styleImages.observe(viewLifecycleOwner, Observer {
+        styleViewModel.images.observe(viewLifecycleOwner, Observer {
             it?.let {
                 adapter.data = it
             }
