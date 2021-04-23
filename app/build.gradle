@@ -94,6 +94,7 @@ dependencies {
     implementation "com.amplifyframework:core:$rootProject.amplifyVersion"
     implementation "com.amplifyframework:aws-auth-cognito:$rootProject.amplifyVersion"
     implementation "com.amplifyframework:aws-storage-s3:$rootProject.amplifyVersion"
+    implementation "com.airbnb.android:lottie:$rootProject.lottieVersion"
 
     // Testing dependencies
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"

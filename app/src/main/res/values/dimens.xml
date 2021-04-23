@@ -6,8 +6,11 @@
     <dimen name="margin_small">8dp</dimen>
     <dimen name="margin_extra_small">4dp</dimen>
 
+    <dimen name="header_size">32sp</dimen>
+    <dimen name="message_size">18sp</dimen>
 
     <dimen name="button_height">56dp</dimen>
+    <dimen name="button_width_percent">0.8</dimen>
 
     <dimen name="card_side_margin">12dp</dimen>
     <dimen name="card_bottom_margin">26dp</dimen>

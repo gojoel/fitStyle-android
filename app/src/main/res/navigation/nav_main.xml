@@ -54,6 +54,14 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_style_transfer_to_error_fragment"
+            app:destination="@id/error_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
@@ -66,5 +74,37 @@
             app:argType="ai.folded.fitstyle.api.ResultImage" />
     </fragment>
 
+    <fragment
+        android:id="@+id/error_fragment"
+        android:name="ai.folded.fitstyle.ErrorFragment"
+        tools:layout="@layout/fragment_error">
+
+        <argument
+            android:name="error_type"
+            app:argType="integer"/>
+
+        <argument
+            android:name="styleOptions"
+            android:defaultValue="@null"
+            app:nullable="true"
+            app:argType="ai.folded.fitstyle.data.StyleOptions"/>
+
+        <action
+            android:id="@+id/action_error_to_style_list_fragment"
+            app:destination="@id/style_list_fragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_error_to_style_transfer_fragment"
+            app:destination="@id/style_transfer_fragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
 
 </navigation>

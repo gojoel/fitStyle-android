@@ -33,10 +33,16 @@ import kotlin.coroutines.suspendCoroutine
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
+
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions
 ) : AndroidViewModel(application) {
+
+    private val _errorStatus = MutableLiveData<Boolean>()
+
+    val errorStatus: LiveData<Boolean>
+        get() = _errorStatus
 
     private val _response = MutableLiveData<ResultImage>()
 
@@ -98,14 +104,21 @@ class StyleTransferViewModel @AssistedInject constructor(
             cancel()
         }
 
-        val result = FitStyleApi.retrofitService.styleTransfer(
-            userId,
-            encodedPhoto,
-            encodedCustomStyle,
-            styleOptions.styleImage?.imageName())
+        try {
+            val result = FitStyleApi.retrofitService.styleTransfer(
+                userId,
+                encodedPhoto,
+                encodedCustomStyle,
+                styleOptions.styleImage?.imageName()
+            )
 
-        withContext(Dispatchers.Main) {
-            _response.value = result
+            withContext(Dispatchers.Main) {
+                _response.value = result
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                _errorStatus.value = true
+            }
         }
     }
 

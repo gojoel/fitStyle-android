@@ -1,6 +1,7 @@
 package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.FragmentStyleTransferBinding
+import ai.folded.fitstyle.utils.ERROR_TYPE_STYLE_TRANSFER
 import ai.folded.fitstyle.viewmodels.StyleTransferViewModel
 import ai.folded.fitstyle.viewmodels.StyleTransferViewModelFactory
 import android.os.Bundle
@@ -47,6 +48,11 @@ class StyleTransferFragment: Fragment() {
         styleTransferViewModel.response.observe(viewLifecycleOwner, Observer {
             this.findNavController().navigate(
                 StyleTransferFragmentDirections.actionStyleTransferToStyleResultFragment(it))
+        })
+
+        styleTransferViewModel.errorStatus.observe(viewLifecycleOwner, Observer {
+            this.findNavController().navigate(
+                StyleTransferFragmentDirections.actionStyleTransferToErrorFragment(ERROR_TYPE_STYLE_TRANSFER, styleOptions = args.styleOptions))
         })
 
         return binding.root
