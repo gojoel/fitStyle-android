@@ -9,3 +9,5 @@ const val STYLE_IMAGES_PATH = "style_images/"
 const val STYLED_IMAGE_NAME = "styled.jpg"
 
 const val URL_EXPIRATION_SEC : Long = 60
+
+const val ERROR_TYPE_STYLE_TRANSFER : Int = 0

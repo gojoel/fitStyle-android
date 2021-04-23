@@ -7,7 +7,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.*
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
 
 private val interceptor = run {
@@ -22,9 +24,9 @@ private val interceptor = run {
 }
 
 private val okHttpClient = OkHttpClient.Builder()
-    .connectTimeout(5, TimeUnit.MINUTES)
-    .writeTimeout(5, TimeUnit.MINUTES)
-    .readTimeout(5, TimeUnit.MINUTES)
+    .connectTimeout(1, TimeUnit.MINUTES)
+    .writeTimeout(1, TimeUnit.MINUTES)
+    .readTimeout(1, TimeUnit.MINUTES)
     .addInterceptor(interceptor)
     .build()
 
