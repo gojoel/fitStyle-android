@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewModel"
-            type="ai.folded.fitstyle.viewmodels.StyleResultViewModel" />
+            type="ai.folded.fitstyle.viewmodels.StyledImageViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                app:imageFromKey="@{viewModel.resultImageKey()}"/>
+                app:imageFromKey="@{viewModel.styledImage.imageKey}"/>
 
         </androidx.cardview.widget.CardView>
 
