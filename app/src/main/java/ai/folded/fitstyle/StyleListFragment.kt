@@ -26,6 +26,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class StyleListFragment: Fragment() {
 
+    lateinit var binding: FragmentStyleListBinding
+
     private val styleViewModel: StyleListViewModel by viewModels()
 
     private val requestPermission =
@@ -49,7 +51,7 @@ class StyleListFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentStyleListBinding.inflate(inflater, container, false)
+        binding = FragmentStyleListBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
         binding.toolbar.setTitle(R.string.select_style_title)
@@ -74,6 +76,8 @@ class StyleListFragment: Fragment() {
     private fun subscribeUi(adapter: StyleListAdapter) {
         styleViewModel.images.observe(viewLifecycleOwner, Observer {
             it?.let {
+                binding.shimmerView.visibility = View.GONE
+                binding.styleList.visibility = View.VISIBLE
                 adapter.data = it
             }
         })
@@ -106,5 +110,16 @@ class StyleListFragment: Fragment() {
 
     private fun showPermissionDeniedDialog() {
         //TODO: handle this
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.shimmerView.startShimmer()
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.shimmerView.stopShimmer()
     }
 }

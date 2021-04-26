@@ -49,7 +49,7 @@ interface FitStyleApiService {
     suspend fun styleTransfer(@Field("user_id") userId: String,
                               @Field("content") content: String,
                               @Field("custom_style") customStyle: String?,
-                              @Field("style_id") styleKey: String?): ResultImage
+                              @Field("style_id") styleKey: String?): StyleTransferResponse
 }
 
 /**

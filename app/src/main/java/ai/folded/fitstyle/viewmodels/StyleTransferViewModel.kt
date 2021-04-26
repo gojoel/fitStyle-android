@@ -1,9 +1,12 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
-import ai.folded.fitstyle.api.ResultImage
+import ai.folded.fitstyle.api.StyleTransferResponse
 import ai.folded.fitstyle.data.StyleOptions
+import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.utils.AwsUtils
+import ai.folded.fitstyle.utils.BUCKET_STYLED_IMAGE_PREFIX
+import ai.folded.fitstyle.utils.STYLED_IMAGE_NAME
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -11,7 +14,6 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
@@ -25,6 +27,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.lang.StringBuilder
 import javax.annotation.Nullable
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -44,9 +47,9 @@ class StyleTransferViewModel @AssistedInject constructor(
     val errorStatus: LiveData<Boolean>
         get() = _errorStatus
 
-    private val _response = MutableLiveData<ResultImage>()
+    private val _response = MutableLiveData<StyledImage>()
 
-    val response: LiveData<ResultImage>
+    val response: LiveData<StyledImage>
         get() = _response
 
     init {
@@ -113,7 +116,14 @@ class StyleTransferViewModel @AssistedInject constructor(
             )
 
             withContext(Dispatchers.Main) {
-                _response.value = result
+                val requestId = result.requestId
+                val imageKey = StringBuilder(BUCKET_STYLED_IMAGE_PREFIX)
+                    .append(userId)
+                    .append(requestId)
+                    .append(STYLED_IMAGE_NAME)
+                    .toString()
+
+                _response.value = StyledImage(imageKey)
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {

@@ -39,6 +39,7 @@ buildscript {
         moshiVersion = "1.9.3"
         amplifyVersion = '1.17.1'
         lottieVersion = '3.4.0'
+        shimmerVersion = '0.5.0'
     }
 
     repositories {

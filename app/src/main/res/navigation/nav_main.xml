@@ -2,7 +2,53 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/style_list_fragment">
+    app:startDestination="@id/welcome_fragment">
+
+    <fragment
+        android:id="@+id/welcome_fragment"
+        android:name="ai.folded.fitstyle.WelcomeFragment"
+        android:label="@string/select_style_title"
+        tools:layout="@layout/fragment_welcome">
+
+        <action
+            android:id="@+id/action_welcome_to_style_list_fragment"
+            app:destination="@id/style_list_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_welcome_to_styled_images_fragment"
+            app:destination="@id/styled_images_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/styled_images_fragment"
+        android:name="ai.folded.fitstyle.StyledListFragment"
+        tools:layout="@layout/fragment_styled_list">
+
+        <action
+            android:id="@+id/action_styled_images_to_style_details_fragment"
+            app:destination="@id/styled_image_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
+            android:id="@+id/action_styled_images_to_style_list_fragment"
+            app:destination="@id/style_list_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
 
     <fragment
         android:id="@+id/style_list_fragment"
@@ -49,7 +95,7 @@
 
         <action
             android:id="@+id/action_style_transfer_to_style_result_fragment"
-            app:destination="@id/style_result_fragment"
+            app:destination="@id/styled_image_fragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -65,13 +111,18 @@
     </fragment>
 
     <fragment
-        android:id="@+id/style_result_fragment"
-        android:name="ai.folded.fitstyle.StyleResultFragment"
-        tools:layout="@layout/fragment_style_result">
+        android:id="@+id/styled_image_fragment"
+        android:name="ai.folded.fitstyle.StyledImageFragment"
+        tools:layout="@layout/fragment_styled_image">
 
         <argument
-            android:name="result"
-            app:argType="ai.folded.fitstyle.api.ResultImage" />
+            android:name="styledImage"
+            app:argType="ai.folded.fitstyle.data.StyledImage" />
+
+        <argument
+            android:name="navSource"
+            app:argType="integer"
+            android:defaultValue="0"/>
     </fragment>
 
     <fragment

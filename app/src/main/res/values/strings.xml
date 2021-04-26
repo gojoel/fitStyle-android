@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">FitStyle</string>
 
+    <string name="settings">Settings</string>
+    <string name="history">History</string>
     <string name="try_again">Try Again</string>
     <string name="start_over">Start Over</string>
+    <string name="get_started">Get Started!</string>
+
     <string name="upload_photo_title">Upload a photo</string>
     <string name="upload_photo">Upload Photo</string>
     <string name="upload_photo_details">Choose a photo from your library that you\'d like to style.</string>
@@ -14,8 +18,13 @@
     <string name="style_almost_done">Almost done!</string>
     <string name="style_transfer_details">Applying the style to your photo. This will only take a few seconds…</string>
 
-    <string name="style_result_title">Result</string>
+    <string name="styled_image_title">Styled Image</string>
 
     <string name="generic_error_title">Oh no!</string>
     <string name="style_transfer_error">Sorry, we were unable to process your request at this time.</string>
+
+    <string name="styled_images_title">My Images</string>
+    <string name="empty_images_title">Nothing yet!</string>
+    <string name="empty_images_message">Your styled images will appear here once created.</string>
+    <string name="style_image">Style Image</string>
 </resources>

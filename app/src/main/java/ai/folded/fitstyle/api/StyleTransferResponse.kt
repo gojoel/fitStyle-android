@@ -5,5 +5,5 @@ import com.squareup.moshi.Json
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class ResultImage(
+data class StyleTransferResponse(
     @Json(name = "request_id") val requestId: String) : Parcelable
