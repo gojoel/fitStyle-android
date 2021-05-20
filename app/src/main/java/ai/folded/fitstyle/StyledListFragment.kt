@@ -2,7 +2,6 @@ package ai.folded.fitstyle
 
 import ai.folded.fitstyle.adapters.StyledImageClickListener
 import ai.folded.fitstyle.adapters.StyledImagesAdapter
-import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.databinding.FragmentStyledListBinding
 import ai.folded.fitstyle.utils.STYLED_IMG_VIEW_SRC_DEFAULT
 import ai.folded.fitstyle.viewmodels.StyledListViewModel
@@ -48,8 +47,7 @@ class StyledListFragment: Fragment() {
         })
 
 
-        val adapter = StyledImagesAdapter(StyledImageClickListener { imageKey ->
-            val styledImage = StyledImage(imageKey)
+        val adapter = StyledImagesAdapter(StyledImageClickListener { styledImage ->
             val direction = StyledListFragmentDirections.actionStyledImagesToStyleDetailsFragment(styledImage, STYLED_IMG_VIEW_SRC_DEFAULT)
             findNavController().navigate(direction)
         })

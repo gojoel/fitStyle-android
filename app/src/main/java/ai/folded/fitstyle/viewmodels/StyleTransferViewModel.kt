@@ -1,11 +1,10 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
-import ai.folded.fitstyle.api.StyleTransferResponse
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.utils.AwsUtils
-import ai.folded.fitstyle.utils.BUCKET_STYLED_IMAGE_PREFIX
+import ai.folded.fitstyle.utils.BUCKET_PRIVATE_PREFIX
 import ai.folded.fitstyle.utils.STYLED_IMAGE_NAME
 import android.app.Application
 import android.graphics.Bitmap
@@ -117,13 +116,9 @@ class StyleTransferViewModel @AssistedInject constructor(
 
             withContext(Dispatchers.Main) {
                 val requestId = result.requestId
-                val imageKey = StringBuilder(BUCKET_STYLED_IMAGE_PREFIX)
-                    .append(userId)
-                    .append(requestId)
-                    .append(STYLED_IMAGE_NAME)
-                    .toString()
-
-                _response.value = StyledImage(imageKey)
+                val imagePath = "$BUCKET_PRIVATE_PREFIX${userId}/${requestId}/"
+                val imageKey = "$imagePath$STYLED_IMAGE_NAME"
+                _response.value = StyledImage(imagePath, imageKey)
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {

@@ -40,6 +40,8 @@ buildscript {
         amplifyVersion = '1.17.1'
         lottieVersion = '3.4.0'
         shimmerVersion = '0.5.0'
+        stripeVersion = '16.8.2'
+        walletVersion = '18.1.1'
     }
 
     repositories {

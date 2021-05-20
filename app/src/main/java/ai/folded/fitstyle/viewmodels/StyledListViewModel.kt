@@ -1,5 +1,6 @@
 package ai.folded.fitstyle.viewmodels
 
+import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.utils.BUCKET_PRIVATE_PREFIX
 import ai.folded.fitstyle.utils.BUCKET_REQUESTS
 import ai.folded.fitstyle.utils.STYLED_IMAGE_NAME
@@ -29,9 +30,9 @@ class StyledListViewModel @Inject internal constructor(
     val emptyStatus: LiveData<Boolean>
         get() = _emptyStatus
 
-    private val _images = MutableLiveData<List<String>>()
+    private val _images = MutableLiveData<List<StyledImage>>()
 
-    val images: LiveData<List<String>>
+    val images: LiveData<List<StyledImage>>
         get() = _images
 
     init {
@@ -73,7 +74,7 @@ class StyledListViewModel @Inject internal constructor(
         }
     }
 
-    private suspend fun fetchImages(userId: String) : List<String> {
+    private suspend fun fetchImages(userId: String) : List<StyledImage> {
         return suspendCoroutine {continuation ->
 
             val options = StorageListOptions.builder()
@@ -83,15 +84,17 @@ class StyledListViewModel @Inject internal constructor(
             Amplify.Storage.list(
                 BUCKET_REQUESTS, options,
                 { result ->
-                    val styledImageKeys = arrayListOf<String>()
+                    val styledImages = arrayListOf<StyledImage>()
                     result.items.forEach { item ->
-                        if (!item.key.endsWith("/") && item.key.contains(STYLED_IMAGE_NAME)) {
+                        if (item.key.endsWith("/")) {
                             val imagePath = "$BUCKET_PRIVATE_PREFIX$userId/${item.key}"
-                            styledImageKeys.add(imagePath)
+                            val imageKey = "$BUCKET_PRIVATE_PREFIX$userId/${item.key}${STYLED_IMAGE_NAME}"
+                            val styledImage = StyledImage(imagePath, imageKey)
+                            styledImages.add(styledImage)
                         }
                     }
 
-                    continuation.resume(styledImageKeys)
+                    continuation.resume(styledImages)
                 },
                 {
                     continuation.resumeWithException(it)

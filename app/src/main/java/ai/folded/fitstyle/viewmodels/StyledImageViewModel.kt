@@ -1,33 +1,22 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.data.StyledImage
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import androidx.lifecycle.*
 
 /**
- * The ViewModel used in [StyledImageFragment].
+ * The ViewModel used in [StyledImageFragment].Z
  */
-class StyledImageViewModel @AssistedInject constructor(
-    @Assisted val styledImage: StyledImage
+internal class StyledImageViewModel(
+    val styledImage: StyledImage,
 ) : ViewModel() {
 
-    companion object {
-        fun provideFactory(
-            assistedFactory: StyledImageViewModelFactory,
-            styledImage: StyledImage
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return assistedFactory.create(styledImage) as T
-            }
+    internal class Factory(
+        private val styledImage: StyledImage,
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return StyledImageViewModel(
+                styledImage,
+            ) as T
         }
     }
-}
-
-@AssistedFactory
-interface StyledImageViewModelFactory {
-    fun create(styledImage: StyledImage): StyledImageViewModel
 }
