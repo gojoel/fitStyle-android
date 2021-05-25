@@ -35,7 +35,7 @@ class StyledListFragment: Fragment() {
             view.findNavController().navigateUp()
         }
 
-        binding.styleImageClickListener = View.OnClickListener {
+        binding.emptyView.styleImageButton.setOnClickListener {
             this.findNavController().navigate(
                 StyledListFragmentDirections.actionStyledImagesToStyleListFragment())
         }
@@ -50,13 +50,7 @@ class StyledListFragment: Fragment() {
         styledImageViewModel.images.observe(viewLifecycleOwner, {
             it?.let {
                 binding.shimmerView.visibility = View.GONE
-
-                binding.emptyView.visibility = if (it.isEmpty()) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-
+                binding.showEmptyView = it.isEmpty()
                 adapter.data = it
             }
         })

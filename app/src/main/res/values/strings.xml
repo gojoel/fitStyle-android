@@ -47,7 +47,7 @@
     <string name="styled_images_title">My Images</string>
     <string name="empty_images_title">Nothing yet!</string>
     <string name="empty_images_message">Your styled images will appear here once created.</string>
-    <string name="style_image">Style Image</string>
+    <string name="style_image">Style An Image</string>
 
     <string name="pay_with_google_content_description">Pay with Google</string>
     <string name="pay_with_google">Pay with Google</string>
