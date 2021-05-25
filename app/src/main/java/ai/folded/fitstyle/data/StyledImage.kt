@@ -7,6 +7,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
+import java.util.*
 
 @Parcelize
 @Entity(tableName = "styled_images")
@@ -15,6 +16,7 @@ data class StyledImage(
     val requestId: String,
     val imagePath: String,
     var purchased: Boolean = false,
+    val createdDate: Long = Date().time
 ) : Parcelable {
     fun previewImageKey(): String {
         return "$imagePath$PREVIEW_IMAGE_NAME"

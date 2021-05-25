@@ -12,7 +12,7 @@ interface StyledImageDao {
     @Query("SELECT * FROM styled_images WHERE id = :id")
     fun get(id: String): Flow<StyledImage>
 
-    @Query("SELECT * FROM styled_images")
+    @Query("SELECT * FROM styled_images ORDER BY createdDate DESC")
     fun getAll(): Flow<List<StyledImage>>
 
     @Insert
