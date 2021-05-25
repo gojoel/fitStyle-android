@@ -13,7 +13,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class PaymentRepository(
+class PaymentRepository(
     private val retrofitService : FitStyleApiService,
     private val workContext: CoroutineContext
 ) {
@@ -39,15 +39,17 @@ internal class PaymentRepository(
         )
     }
 
-    suspend fun createWatermarkPayment(userId: String, imageKey: String) = withContext(workContext) {
+    suspend fun createWatermarkPayment(requestId: String) = withContext(workContext) {
+        val userId = getUserId();
         flowOf(
             kotlin.runCatching {
-                retrofitService.createWatermarkPayment(PaymentRequest(userId = userId, imageKey = imageKey, currency = CURRENCY))
+                retrofitService.createWatermarkPayment(PaymentRequest(userId = userId, requestId = requestId, currency = CURRENCY))
             }
         )
     }
 
-    suspend fun removeWatermark(imagePath: String) = withContext(workContext) {
-        retrofitService.removeWatermark(imagePath)
+    suspend fun removeWatermark(requestId: String) = withContext(workContext) {
+        val userId = getUserId();
+        retrofitService.removeWatermark(userId, requestId)
     }
 }

@@ -7,8 +7,8 @@ data class PaymentRequest(
     var currency: String,
     @Json(name = "userId")
     var userId: String,
-    @Json(name = "imageKey")
-    var imageKey: String,
+    @Json(name = "requestId")
+    var requestId: String,
     @Json(name = "customer")
     var customer: String = "",
     @Json(name = "mode")

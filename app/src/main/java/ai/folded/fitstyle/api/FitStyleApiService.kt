@@ -59,7 +59,7 @@ interface FitStyleApiService {
 
     @FormUrlEncoded
     @POST("api/remove_watermark")
-    suspend fun removeWatermark(@Field("imagePath") imagePath: String)
+    suspend fun removeWatermark(@Field("userId") userId: String, @Field("requestId") requestId: String)
 }
 
 /**

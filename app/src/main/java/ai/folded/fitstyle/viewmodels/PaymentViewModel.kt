@@ -4,6 +4,7 @@ import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.PaymentRepository
+import ai.folded.fitstyle.repository.StyledImageRepository
 import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,8 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentViewModel (
     application: Application,
     val styledImage: StyledImage,
-    private val repository: PaymentRepository
+    private val repository: PaymentRepository,
+    private val styledImageRepository: StyledImageRepository
 ) : AndroidViewModel(application) {
     val progress = MutableLiveData<Boolean>()
     val status = MutableLiveData<Status>()
@@ -22,8 +24,7 @@ internal class PaymentViewModel (
         progress.postValue(true)
         status.postValue(Status.WAITING)
 
-        val userId = repository.getUserId();
-        val paymentResponse = repository.createWatermarkPayment(userId, styledImage.imageKey).single()
+        val paymentResponse = repository.createWatermarkPayment(styledImage.requestId).single()
 
         paymentResponse.fold(
             onSuccess = {
@@ -38,13 +39,17 @@ internal class PaymentViewModel (
         emit(paymentResponse.getOrNull())
     }
 
-    fun removeWatermark(imagePath: String) = liveData {
+    fun removeWatermark(styledImage: StyledImage) = liveData {
         progress.postValue(true)
 
         var successful = false
         try {
-            repository.removeWatermark(imagePath)
+            repository.removeWatermark(styledImage.requestId)
+            styledImage.purchased = true
+            styledImageRepository.update(styledImage)
+
             successful = true
+
         } catch (e: Exception) {
             // TODO: log exception
         }
@@ -60,10 +65,25 @@ internal class PaymentViewModel (
         )
     }
 
+
+    fun test(styledImage: StyledImage) = liveData {
+        progress.postValue(true)
+
+        styledImage.purchased = true
+        styledImageRepository.update(styledImage)
+
+        progress.postValue(false)
+
+        emit(
+            Status.SUCCESS
+        )
+    }
+
     internal class Factory(
         private val application: Application,
         private val styledImage: StyledImage,
-        private val workContext: CoroutineContext = Dispatchers.IO
+        private val workContext: CoroutineContext = Dispatchers.IO,
+        private val styledImageRepository: StyledImageRepository
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val repository = PaymentRepository(
@@ -75,6 +95,7 @@ internal class PaymentViewModel (
                 application,
                 styledImage,
                 repository,
+                styledImageRepository
             ) as T
         }
     }

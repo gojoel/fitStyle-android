@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +26,7 @@ class StyledListFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentStyledListBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
@@ -41,12 +40,6 @@ class StyledListFragment: Fragment() {
                 StyledListFragmentDirections.actionStyledImagesToStyleListFragment())
         }
 
-        styledImageViewModel.emptyStatus.observe(viewLifecycleOwner, Observer {
-            binding.shimmerView.visibility = View.GONE
-            binding.emptyView.visibility = View.VISIBLE
-        })
-
-
         val adapter = StyledImagesAdapter(StyledImageClickListener { styledImage ->
             val direction = StyledListFragmentDirections.actionStyledImagesToStyleDetailsFragment(styledImage, STYLED_IMG_VIEW_SRC_DEFAULT)
             findNavController().navigate(direction)
@@ -54,10 +47,16 @@ class StyledListFragment: Fragment() {
 
         binding.styledRecyclerView.adapter = adapter
 
-        styledImageViewModel.images.observe(viewLifecycleOwner, Observer {
+        styledImageViewModel.images.observe(viewLifecycleOwner, {
             it?.let {
                 binding.shimmerView.visibility = View.GONE
-                binding.emptyView.visibility = View.GONE
+
+                binding.emptyView.visibility = if (it.isEmpty()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+
                 adapter.data = it
             }
         })

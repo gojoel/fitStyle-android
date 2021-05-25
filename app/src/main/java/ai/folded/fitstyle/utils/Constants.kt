@@ -13,6 +13,8 @@ const val MERCHANT = "Folded AI"
 const val CURRENCY = "usd"
 const val COUNTRY_CODE = "US"
 
+const val DATABASE_NAME = "fitstyle-db"
+
 const val URL_EXPIRATION_SEC : Long = 60
 
 const val ERROR_TYPE_STYLE_TRANSFER : Int = 0

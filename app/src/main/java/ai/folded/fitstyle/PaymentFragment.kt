@@ -2,6 +2,7 @@ package ai.folded.fitstyle
 
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.databinding.FragmentPaymentBinding
+import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.utils.COUNTRY_CODE
 import ai.folded.fitstyle.utils.MERCHANT
 import ai.folded.fitstyle.viewmodels.PaymentViewModel
@@ -20,6 +21,7 @@ import androidx.navigation.fragment.navArgs
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PaymentFragment: Fragment() {
@@ -28,6 +30,11 @@ class PaymentFragment: Fragment() {
     private val binding get() = _binding!!
 
     private val args: PaymentFragmentArgs by navArgs()
+
+    @Inject
+    lateinit var styledImageRepository: StyledImageRepository
+
+    private lateinit var paymentSheet: PaymentSheet
 
     private val googlePayConfig: PaymentSheet.GooglePayConfiguration
         get() {
@@ -46,11 +53,10 @@ class PaymentFragment: Fragment() {
     private val paymentViewModel: PaymentViewModel by viewModels {
         PaymentViewModel.Factory(
             requireNotNull(activity).application,
-            args.styledImage
+            args.styledImage,
+            styledImageRepository = styledImageRepository
         )
     }
-
-    private lateinit var paymentSheet: PaymentSheet
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -123,10 +129,6 @@ class PaymentFragment: Fragment() {
         paymentViewModel.preparePaymentRequest()
             .observe(viewLifecycleOwner) { checkoutResponse ->
                 if (checkoutResponse != null) {
-                    // Re-initing here because the ExampleApplication inits with the key from
-                    // gradle properties
-//                    PaymentConfiguration.init(this, checkoutResponse.publishableKey)
-
                     onSuccess(
                         PaymentSheet.CustomerConfiguration(
                             id = checkoutResponse.customerId,
@@ -153,7 +155,7 @@ class PaymentFragment: Fragment() {
             is PaymentSheetResult.Completed -> {
                 binding.progressDetails.text = getString(R.string.status_removing_watermark)
 
-                paymentViewModel.removeWatermark(args.styledImage.imagePath).observe(this) { status ->
+                paymentViewModel.removeWatermark(args.styledImage).observe(this) { status ->
                     if (status == Status.SUCCESS) {
                         showSuccessDialog()
                     } else {
@@ -189,6 +191,10 @@ class PaymentFragment: Fragment() {
             R.string.ok,
         )
 
+        dialog.buttonClick.observe(this) {
+            dialog.dismiss()
+        }
+
         dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
     }
 
@@ -211,6 +217,10 @@ class PaymentFragment: Fragment() {
             R.drawable.ic_circle_close,
             R.string.ok,
         )
+
+        dialog.buttonClick.observe(this) {
+            dialog.dismiss()
+        }
 
         dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
     }

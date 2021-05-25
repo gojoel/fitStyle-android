@@ -3,9 +3,9 @@ package ai.folded.fitstyle.viewmodels
 import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
+import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.utils.AwsUtils
 import ai.folded.fitstyle.utils.BUCKET_PRIVATE_PREFIX
-import ai.folded.fitstyle.utils.STYLED_IMAGE_NAME
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -26,7 +26,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.lang.StringBuilder
 import javax.annotation.Nullable
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -38,7 +37,8 @@ import kotlin.coroutines.suspendCoroutine
 
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
-    @Assisted val styleOptions: StyleOptions
+    @Assisted val styleOptions: StyleOptions,
+    private val styledImageRepository: StyledImageRepository
 ) : AndroidViewModel(application) {
 
     private val _errorStatus = MutableLiveData<Boolean>()
@@ -114,11 +114,9 @@ class StyleTransferViewModel @AssistedInject constructor(
                 styleOptions.styleImage?.imageName()
             )
 
+            val styledImage = styledImageRepository.create(result.requestId, userId)
             withContext(Dispatchers.Main) {
-                val requestId = result.requestId
-                val imagePath = "$BUCKET_PRIVATE_PREFIX${userId}/${requestId}/"
-                val imageKey = "$imagePath$STYLED_IMAGE_NAME"
-                _response.value = StyledImage(imagePath, imageKey)
+                _response.value = styledImage
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
