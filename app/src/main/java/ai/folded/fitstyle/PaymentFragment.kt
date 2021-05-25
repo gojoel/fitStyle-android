@@ -109,13 +109,12 @@ class PaymentFragment: Fragment() {
 
     private fun onPurchase() {
         binding.confirmPaymentButton.isEnabled = false
-        prepareCheckout {customerConfig, clientSecret ->
+        prepareCheckout {_, clientSecret ->
             paymentSheet.presentWithPaymentIntent(
                 clientSecret,
                 PaymentSheet.Configuration(
                     merchantDisplayName = MERCHANT,
                     googlePay = googlePayConfig,
-                    customer = customerConfig,
                     primaryButtonColor = ColorStateList.valueOf(ContextCompat.getColor(
                         requireNotNull(activity), R.color.purple_200))
                 )
