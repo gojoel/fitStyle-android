@@ -2,7 +2,6 @@ package ai.folded.fitstyle
 
 import ai.folded.fitstyle.adapters.StyledImageClickListener
 import ai.folded.fitstyle.adapters.StyledImagesAdapter
-import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.databinding.FragmentStyledListBinding
 import ai.folded.fitstyle.utils.STYLED_IMG_VIEW_SRC_DEFAULT
 import ai.folded.fitstyle.viewmodels.StyledListViewModel
@@ -12,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +26,7 @@ class StyledListFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentStyledListBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
@@ -37,29 +35,22 @@ class StyledListFragment: Fragment() {
             view.findNavController().navigateUp()
         }
 
-        binding.styleImageClickListener = View.OnClickListener {
+        binding.emptyView.styleImageButton.setOnClickListener {
             this.findNavController().navigate(
                 StyledListFragmentDirections.actionStyledImagesToStyleListFragment())
         }
 
-        styledImageViewModel.emptyStatus.observe(viewLifecycleOwner, Observer {
-            binding.shimmerView.visibility = View.GONE
-            binding.emptyView.visibility = View.VISIBLE
-        })
-
-
-        val adapter = StyledImagesAdapter(StyledImageClickListener { imageKey ->
-            val styledImage = StyledImage(imageKey)
+        val adapter = StyledImagesAdapter(StyledImageClickListener { styledImage ->
             val direction = StyledListFragmentDirections.actionStyledImagesToStyleDetailsFragment(styledImage, STYLED_IMG_VIEW_SRC_DEFAULT)
             findNavController().navigate(direction)
         })
 
         binding.styledRecyclerView.adapter = adapter
 
-        styledImageViewModel.images.observe(viewLifecycleOwner, Observer {
+        styledImageViewModel.images.observe(viewLifecycleOwner, {
             it?.let {
                 binding.shimmerView.visibility = View.GONE
-                binding.emptyView.visibility = View.GONE
+                binding.showEmptyView = it.isEmpty()
                 adapter.data = it
             }
         })

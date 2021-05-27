@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FitStyle"
         android:usesCleartextTraffic="true">
+
+        <!-- Enables the Google Payment API -->
+        <meta-data android:name="com.google.android.gms.wallet.api.enabled" android:value="true" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

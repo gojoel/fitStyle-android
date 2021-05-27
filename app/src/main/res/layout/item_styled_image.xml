@@ -4,15 +4,15 @@
 
     <data>
         <variable
-            name="imageKey"
-            type="String"/>
+            name="styledImage"
+            type="ai.folded.fitstyle.data.StyledImage"/>
         <variable
             name="clickListener"
             type="ai.folded.fitstyle.adapters.StyledImageClickListener"/>
     </data>
 
     <ai.folded.fitstyle.views.MaskedCardView
-        android:onClick="@{() -> clickListener.onViewImageClick(imageKey))}"
+        android:onClick="@{() -> clickListener.onViewImageClick(styledImage)}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/card_side_margin"
@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/reference_item_image_height"
                 android:scaleType="centerCrop"
-                app:imageFromKey="@{imageKey}"
+                app:imageFromKey="@{styledImage.imageKey}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

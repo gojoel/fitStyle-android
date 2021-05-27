@@ -1,27 +1,29 @@
 package ai.folded.fitstyle.viewmodels
 
-import ai.folded.fitstyle.data.StyledImage
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import ai.folded.fitstyle.repository.StyledImageRepository
+import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /**
- * The ViewModel used in [StyledImageFragment].
+ * The ViewModel used in [StyledImageFragment]
  */
 class StyledImageViewModel @AssistedInject constructor(
-    @Assisted val styledImage: StyledImage
+    @Assisted val imageId: String,
+    private val styledImageRepository: StyledImageRepository
 ) : ViewModel() {
+
+    val styledImage = styledImageRepository.get(imageId).asLiveData()
 
     companion object {
         fun provideFactory(
             assistedFactory: StyledImageViewModelFactory,
-            styledImage: StyledImage
+            imageId: String
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return assistedFactory.create(styledImage) as T
+                return assistedFactory.create(imageId) as T
             }
         }
     }
@@ -29,5 +31,5 @@ class StyledImageViewModel @AssistedInject constructor(
 
 @AssistedFactory
 interface StyledImageViewModelFactory {
-    fun create(styledImage: StyledImage): StyledImageViewModel
+    fun create(imageId: String): StyledImageViewModel
 }

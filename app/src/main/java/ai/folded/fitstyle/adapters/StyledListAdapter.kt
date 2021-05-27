@@ -1,5 +1,6 @@
 package ai.folded.fitstyle.adapters
 
+import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.databinding.ItemStyledImageBinding
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class StyledImagesAdapter(private val clickListener: StyledImageClickListener) : RecyclerView.Adapter<StyledImagesAdapter.ImageViewHolder>() {
 
-    var data = listOf<String>()
+    var data = listOf<StyledImage>()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -21,14 +22,14 @@ class StyledImagesAdapter(private val clickListener: StyledImageClickListener) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val imageKey = data[position]
-        holder.bind(imageKey, clickListener)
+        val styledImage = data[position]
+        holder.bind(styledImage, clickListener)
     }
 
     class ImageViewHolder private constructor(val binding: ItemStyledImageBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: String, clickListener: StyledImageClickListener) {
-            binding.imageKey = item
+        fun bind(item: StyledImage, clickListener: StyledImageClickListener) {
+            binding.styledImage = item
             binding.clickListener = clickListener
             binding.executePendingBindings()
         }
@@ -43,6 +44,6 @@ class StyledImagesAdapter(private val clickListener: StyledImageClickListener) :
     }
 }
 
-class StyledImageClickListener(val viewImageClickListener: (imageKey: String) -> Unit) {
-    fun onViewImageClick(imageKey: String) = viewImageClickListener(imageKey)
+class StyledImageClickListener(val viewImageClickListener: (styledImage: StyledImage) -> Unit) {
+    fun onViewImageClick(styledImage: StyledImage) = viewImageClickListener(styledImage)
 }

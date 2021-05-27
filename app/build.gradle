@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'kotlin-android-extensions'
+    id 'kotlin-parcelize'
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs.kotlin'
 }
@@ -35,7 +35,9 @@ android {
     buildTypes {
         debug {
             buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle-dev\""
-            buildConfigField "String", "BASE_URL", localProperties['BASE_URL_DEV']
+            buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL_DEV']
+            buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_TEST_PUBLISHABLE_KEY']
+            buildConfigField "String", "STRIPE_ACCOUNT_ID", localProperties['FITSTYLE_STRIPE_ACC_ID']
         }
 
         release {
@@ -43,7 +45,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle\""
-            buildConfigField "String", "BASE_URL", localProperties['BASE_URL_PROD']
+            buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL']
+            buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_PUBLISHABLE_KEY']
+            buildConfigField "String", "STRIPE_ACCOUNT_ID", localProperties['FITSTYLE_STRIPE_ACC_ID']
         }
     }
 
@@ -96,6 +100,8 @@ dependencies {
     implementation "com.amplifyframework:aws-storage-s3:$rootProject.amplifyVersion"
     implementation "com.airbnb.android:lottie:$rootProject.lottieVersion"
     implementation "com.facebook.shimmer:shimmer:$rootProject.shimmerVersion"
+    implementation "com.google.android.gms:play-services-wallet:$rootProject.walletVersion"
+    implementation "com.stripe:stripe-android:$rootProject.stripeVersion"
 
     // Testing dependencies
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"

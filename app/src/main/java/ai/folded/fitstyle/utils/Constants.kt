@@ -1,11 +1,19 @@
 package ai.folded.fitstyle.utils
 
+// S3
 const val BUCKET_PUBLIC_PREFIX = "public/"
 const val BUCKET_PRIVATE_PREFIX = "private/"
-const val BUCKET_STYLED_IMAGE_PREFIX = "private/requests/"
 const val BUCKET_REQUESTS = "requests/"
 const val STYLE_IMAGES_PATH = "style_images/"
 const val STYLED_IMAGE_NAME = "styled.jpg"
+const val PREVIEW_IMAGE_NAME = "preview.jpg"
+
+// Stripe
+const val MERCHANT = "Folded AI"
+const val CURRENCY = "usd"
+const val COUNTRY_CODE = "US"
+
+const val DATABASE_NAME = "fitstyle-db"
 
 const val URL_EXPIRATION_SEC : Long = 60
 

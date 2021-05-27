@@ -1,6 +1,7 @@
 package ai.folded.fitstyle.adapters
 
 import ai.folded.fitstyle.utils.AwsUtils
+import ai.folded.fitstyle.views.BlurTransformation
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -23,6 +24,18 @@ fun bindImageFromKey(view: ImageView, imageKey: String?) {
         Glide.with(view.context)
             .load(url.toString())
             .transition(DrawableTransitionOptions.withCrossFade())
+            .into(view)
+    }
+}
+
+@BindingAdapter("blurImageFromKey")
+fun bindBlurredImageFromKey(view: ImageView, imageKey: String?) {
+    if (!imageKey.isNullOrEmpty()) {
+        val url = AwsUtils.generateUrl(imageKey)
+        Glide.with(view.context)
+            .load(url.toString())
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .transform( BlurTransformation(view.context) )
             .into(view)
     }
 }
