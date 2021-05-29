@@ -5,6 +5,7 @@ import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
+import ai.folded.fitstyle.repository.UserRepository
 import ai.folded.fitstyle.utils.AwsUtils
 import android.app.Application
 import android.graphics.Bitmap
@@ -13,12 +14,7 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
-import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.*
-import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
-import com.amplifyframework.auth.result.AuthSessionResult
-import com.amplifyframework.core.Amplify
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -28,19 +24,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
-
 
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
-
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions,
-    private val styledImageRepository: StyledImageRepository
+    private val styledImageRepository: StyledImageRepository,
+    private val userRepository: UserRepository
 ) : AndroidViewModel(application) {
 
     private val _status = MutableLiveData<Status?>()
@@ -61,36 +53,12 @@ class StyleTransferViewModel @AssistedInject constructor(
         viewModelScope.launch {
             _status.value = Status.WAITING
             try {
-                val userId = getUserId()
+                val userId = userRepository.getUserId()
                 callStyleTransfer(userId)
             } catch (e: Exception) {
                 // TODO: handle and log error
                 _status.value = Status.FAILED
             }
-        }
-    }
-
-    private suspend fun getUserId() : String {
-        return suspendCoroutine {continuation ->
-            Amplify.Auth.fetchAuthSession(
-                {
-                    val session = it as AWSCognitoAuthSession
-                    when (session.identityId.type) {
-
-                        AuthSessionResult.Type.SUCCESS -> {
-                            continuation.resume(session.identityId.value ?: "")
-                        }
-                        AuthSessionResult.Type.FAILURE -> {
-                            //  TODO: log failure to retrieve identity id
-                            continuation.resumeWithException(Exception("Unable to retrieve user"))
-                        }
-                    }
-                },
-                {
-                    // TODO: log failure to fetch session
-                    continuation.resumeWithException(it)
-                }
-            )
         }
     }
 

@@ -5,6 +5,7 @@ import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.PaymentRepository
 import ai.folded.fitstyle.repository.StyledImageRepository
+import ai.folded.fitstyle.repository.UserRepository
 import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,8 @@ internal class PaymentViewModel (
     application: Application,
     val styledImage: StyledImage,
     private val repository: PaymentRepository,
-    private val styledImageRepository: StyledImageRepository
+    private val styledImageRepository: StyledImageRepository,
+    private val userRepository: UserRepository
 ) : AndroidViewModel(application) {
     val progress = MutableLiveData<Boolean>()
     val status = MutableLiveData<Status>()
@@ -24,7 +26,8 @@ internal class PaymentViewModel (
         progress.postValue(true)
         status.postValue(Status.WAITING)
 
-        val paymentResponse = repository.createWatermarkPayment(styledImage.requestId).single()
+        val userId = userRepository.getUserId();
+        val paymentResponse = repository.createWatermarkPayment(userId, styledImage.requestId).single()
 
         paymentResponse.fold(
             onSuccess = {
@@ -44,7 +47,8 @@ internal class PaymentViewModel (
 
         var successful = false
         try {
-            repository.removeWatermark(styledImage.requestId)
+            val userId = userRepository.getUserId();
+            repository.removeWatermark(userId, styledImage.requestId)
             styledImage.purchased = true
             styledImageRepository.update(styledImage)
 
@@ -65,25 +69,12 @@ internal class PaymentViewModel (
         )
     }
 
-
-    fun test(styledImage: StyledImage) = liveData {
-        progress.postValue(true)
-
-        styledImage.purchased = true
-        styledImageRepository.update(styledImage)
-
-        progress.postValue(false)
-
-        emit(
-            Status.SUCCESS
-        )
-    }
-
     internal class Factory(
         private val application: Application,
         private val styledImage: StyledImage,
         private val workContext: CoroutineContext = Dispatchers.IO,
-        private val styledImageRepository: StyledImageRepository
+        private val styledImageRepository: StyledImageRepository,
+        private val userRepository: UserRepository
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val repository = PaymentRepository(
@@ -95,7 +86,8 @@ internal class PaymentViewModel (
                 application,
                 styledImage,
                 repository,
-                styledImageRepository
+                styledImageRepository,
+                userRepository
             ) as T
         }
     }

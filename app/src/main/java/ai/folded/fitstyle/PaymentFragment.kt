@@ -3,6 +3,7 @@ package ai.folded.fitstyle
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.databinding.FragmentPaymentBinding
 import ai.folded.fitstyle.repository.StyledImageRepository
+import ai.folded.fitstyle.repository.UserRepository
 import ai.folded.fitstyle.utils.COUNTRY_CODE
 import ai.folded.fitstyle.utils.MERCHANT
 import ai.folded.fitstyle.viewmodels.PaymentViewModel
@@ -34,6 +35,9 @@ class PaymentFragment: Fragment() {
     @Inject
     lateinit var styledImageRepository: StyledImageRepository
 
+    @Inject
+    lateinit var userRepository: UserRepository
+
     private lateinit var paymentSheet: PaymentSheet
 
     private val googlePayConfig: PaymentSheet.GooglePayConfiguration
@@ -54,7 +58,8 @@ class PaymentFragment: Fragment() {
         PaymentViewModel.Factory(
             requireNotNull(activity).application,
             args.styledImage,
-            styledImageRepository = styledImageRepository
+            styledImageRepository = styledImageRepository,
+            userRepository = userRepository,
         )
     }
 
