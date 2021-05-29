@@ -2,8 +2,6 @@ package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.FragmentUploadPhotoBinding
 import ai.folded.fitstyle.utils.PermissionUtils
-import ai.folded.fitstyle.viewmodels.StyleTransferViewModel
-import ai.folded.fitstyle.viewmodels.StyleTransferViewModelFactory
 import ai.folded.fitstyle.viewmodels.UploadPhotoViewModel
 import ai.folded.fitstyle.viewmodels.UploadPhotoViewModelFactory
 import android.Manifest
@@ -18,7 +16,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -59,7 +56,7 @@ class UploadPhotoFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         val binding = FragmentUploadPhotoBinding.inflate(inflater, container, false)
         context ?: return binding.root
@@ -83,9 +80,12 @@ class UploadPhotoFragment : Fragment() {
             }
         }
 
-        uploadPhotoViewModel.navigateToStyleTransfer.observe(viewLifecycleOwner, Observer {
-            this.findNavController().navigate(
-                UploadPhotoFragmentDirections.actionUploadPhotoToStyleTransferFragment(it))
+        uploadPhotoViewModel.navigateToStyleTransfer.observe(viewLifecycleOwner, {
+            it?.let {
+                this.findNavController().navigate(
+                    UploadPhotoFragmentDirections.actionUploadPhotoToStyleTransferFragment(it))
+                uploadPhotoViewModel.clearSelection()
+            }
         })
 
         setHasOptionsMenu(true)

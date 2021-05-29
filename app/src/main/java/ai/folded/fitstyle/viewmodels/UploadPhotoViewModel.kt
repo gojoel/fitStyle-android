@@ -16,7 +16,7 @@ class UploadPhotoViewModel @AssistedInject constructor(
     @Assisted val styleOptions: StyleOptions
 ) : ViewModel() {
 
-    private val _navigateToStyleTransfer = MutableLiveData<StyleOptions>()
+    private val _navigateToStyleTransfer = MutableLiveData<StyleOptions?>()
 
     val navigateToStyleTransfer
         get() = _navigateToStyleTransfer
@@ -24,6 +24,10 @@ class UploadPhotoViewModel @AssistedInject constructor(
     fun onPhotoUploaded(photoUri: Uri) {
         styleOptions.photoUri = photoUri
         _navigateToStyleTransfer.value = styleOptions
+    }
+
+    fun clearSelection() {
+        _navigateToStyleTransfer.value = null
     }
 
     companion object {

@@ -21,7 +21,7 @@ class ErrorFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentErrorBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
@@ -52,7 +52,7 @@ class ErrorFragment: Fragment() {
             ERROR_TYPE_STYLE_TRANSFER -> {
                 args.styleOptions?.let {
                     this.findNavController().navigate(
-                        ErrorFragmentDirections.actionErrorToStyleTransferFragment(it))
+                        ErrorFragmentDirections.actionErrorToStyleTransferFragment())
                 }
             }
         }

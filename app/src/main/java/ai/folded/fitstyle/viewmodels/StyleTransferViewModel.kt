@@ -1,11 +1,11 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
+import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.utils.AwsUtils
-import ai.folded.fitstyle.utils.BUCKET_PRIVATE_PREFIX
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -13,6 +13,7 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.*
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
@@ -28,6 +29,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
@@ -41,28 +43,29 @@ class StyleTransferViewModel @AssistedInject constructor(
     private val styledImageRepository: StyledImageRepository
 ) : AndroidViewModel(application) {
 
-    private val _errorStatus = MutableLiveData<Boolean>()
+    private val _status = MutableLiveData<Status?>()
 
-    val errorStatus: LiveData<Boolean>
-        get() = _errorStatus
+    val status: LiveData<Status?>
+        get() = _status
 
-    private val _response = MutableLiveData<StyledImage>()
+    private val _response = MutableLiveData<StyledImage?>()
 
-    val response: LiveData<StyledImage>
+    val response: LiveData<StyledImage?>
         get() = _response
 
     init {
-        styleTransfer()
+        startStyleTransfer()
     }
 
-    private fun styleTransfer() {
+    fun startStyleTransfer() {
         viewModelScope.launch {
-            val userId = getUserId()
+            _status.value = Status.WAITING
             try {
+                val userId = getUserId()
                 callStyleTransfer(userId)
             } catch (e: Exception) {
                 // TODO: handle and log error
-                Toast.makeText(getApplication(), e.localizedMessage, Toast.LENGTH_SHORT).show()
+                _status.value = Status.FAILED
             }
         }
     }
@@ -79,12 +82,13 @@ class StyleTransferViewModel @AssistedInject constructor(
                         }
                         AuthSessionResult.Type.FAILURE -> {
                             //  TODO: log failure to retrieve identity id
-                            continuation.resume("")
+                            continuation.resumeWithException(Exception("Unable to retrieve user"))
                         }
                     }
                 },
                 {
                     // TODO: log failure to fetch session
+                    continuation.resumeWithException(it)
                 }
             )
         }
@@ -117,10 +121,11 @@ class StyleTransferViewModel @AssistedInject constructor(
             val styledImage = styledImageRepository.create(result.requestId, userId)
             withContext(Dispatchers.Main) {
                 _response.value = styledImage
+                _status.value = Status.SUCCESS
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                _errorStatus.value = true
+                _status.value = Status.FAILED
             }
         }
     }
@@ -157,6 +162,11 @@ class StyleTransferViewModel @AssistedInject constructor(
         } ?: run {
             styleOptions.customStyleUri?.toString() ?: ""
         }
+    }
+
+    fun clearTransferState() {
+        _response.value = null
+        _status.value = null
     }
 
     companion object {
