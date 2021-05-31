@@ -27,11 +27,11 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/plant_item_image"
+                android:id="@+id/item_image"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/reference_item_image_height"
                 android:scaleType="centerCrop"
-                app:imageFromKey="@{styledImage.imageKey}"
+                app:styledImage="@{styledImage}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
