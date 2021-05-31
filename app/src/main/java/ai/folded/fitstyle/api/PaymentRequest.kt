@@ -21,7 +21,7 @@ data class PaymentResponse(
     @Json(name = "clientSecret")
     val clientSecret: String,
     @Json(name = "customerId")
-    val customerId: String,
+    val customerId: String?,
     @Json(name = "ephemeralKey")
-    val ephemeralKey: String,
+    val ephemeralKey: String?,
 )

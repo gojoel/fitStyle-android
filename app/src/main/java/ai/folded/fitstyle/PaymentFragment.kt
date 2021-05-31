@@ -128,16 +128,13 @@ class PaymentFragment: Fragment() {
     }
 
     private fun prepareCheckout(
-        onSuccess: (PaymentSheet.CustomerConfiguration, String) -> Unit
+        onSuccess: (PaymentSheet.CustomerConfiguration?, String) -> Unit
     ) {
         paymentViewModel.preparePaymentRequest()
             .observe(viewLifecycleOwner) { checkoutResponse ->
                 if (checkoutResponse != null) {
                     onSuccess(
-                        PaymentSheet.CustomerConfiguration(
-                            id = checkoutResponse.customerId,
-                            ephemeralKeySecret = checkoutResponse.ephemeralKey
-                        ),
+                        null,
                         checkoutResponse.clientSecret
                     )
                 }
