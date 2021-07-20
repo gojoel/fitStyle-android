@@ -169,14 +169,14 @@ class PaymentFragment: Fragment() {
 
     private fun showSuccessDialog() {
         val dialog = SimpleDialogFragment.newInstance(
-            R.string.remove_watermark_payment_success,
-            R.string.all_set,
-            R.drawable.ic_circle_checkmark,
-            R.string.view_image,
-            false
+            messageRes = R.string.remove_watermark_payment_success,
+            titleRes = R.string.all_set,
+            imageRes = R.drawable.ic_circle_checkmark,
+            positiveButtonTitleRes = R.string.view_image,
+            dismissible = false
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
             binding.root.findNavController().navigateUp()
         }
@@ -186,13 +186,13 @@ class PaymentFragment: Fragment() {
 
     private fun showPaymentRequestErrorDialog() {
         val dialog = SimpleDialogFragment.newInstance(
-            R.string.remove_watermark_payment_failure,
-            R.string.payment_failed,
-            R.drawable.ic_circle_close,
-            R.string.ok,
+            messageRes = R.string.remove_watermark_payment_failure,
+            titleRes = R.string.payment_failed,
+            imageRes = R.drawable.ic_circle_close,
+            positiveButtonTitleRes = R.string.ok,
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
         }
 
@@ -213,13 +213,13 @@ class PaymentFragment: Fragment() {
         }
 
         val dialog = SimpleDialogFragment.newInstance(
-            messageRes,
-            titleRes,
-            R.drawable.ic_circle_close,
-            R.string.ok,
+            messageRes = messageRes,
+            titleRes = titleRes,
+            imageRes = R.drawable.ic_circle_close,
+            positiveButtonTitleRes = R.string.ok,
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
         }
 
@@ -228,14 +228,14 @@ class PaymentFragment: Fragment() {
 
     private fun showRemovalErrorDialog() {
         val dialog = SimpleDialogFragment.newInstance(
-            R.string.remove_watermark_failed,
-            R.string.oh_no,
-            R.drawable.ic_circle_close,
-            R.string.ok,
+            messageRes = R.string.remove_watermark_failed,
+            titleRes = R.string.oh_no,
+            imageRes = R.drawable.ic_circle_close,
+            positiveButtonTitleRes = R.string.ok,
             dismissible = false
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
             binding.root.findNavController().navigateUp()
         }

@@ -1,6 +1,7 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
+import ai.folded.fitstyle.api.StyleTransferResultResponse
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
@@ -18,10 +19,8 @@ import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
 
@@ -34,6 +33,9 @@ class StyleTransferViewModel @AssistedInject constructor(
     private val styledImageRepository: StyledImageRepository,
     private val userRepository: UserRepository
 ) : AndroidViewModel(application) {
+
+    @Volatile
+    var jobId: String? = null
 
     private val _status = MutableLiveData<Status?>()
 
@@ -62,6 +64,18 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
+    suspend fun cancelStyleTransfer() = withContext(Dispatchers.IO) {
+        jobId?.let {
+            try {
+                FitStyleApi.retrofitService.cancelStyleTransferTask(it)
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _status.value = Status.FAILED
+                }
+            }
+        }
+    }
+
     private suspend fun callStyleTransfer(userId: String) = withContext(Dispatchers.IO) {
         val photoBitmap = getBitmapFromUri(styleOptions.photoUri)
         val styleBitmap = getBitmapFromUri(styleOptions.customStyleUri)
@@ -86,15 +100,38 @@ class StyleTransferViewModel @AssistedInject constructor(
                 styleOptions.styleImage?.imageName()
             )
 
-            val styledImage = styledImageRepository.create(result.requestId, userId)
-            withContext(Dispatchers.Main) {
-                _response.value = styledImage
-                _status.value = Status.SUCCESS
-            }
+            // track current job in progress
+            jobId = result.jobId
+
+            // continuously attempt to get the results with a retry limit and backoff delay
+            getResult(result.jobId)
+                .flowOn(Dispatchers.Default)
+                .retry (retries = 100) {
+                    delay(5000)
+                    return@retry true
+                }.catch {
+                    withContext(Dispatchers.Main) {
+                        _status.value = Status.FAILED
+                    }
+                }
+                .collect { response ->
+                    val styledImage = styledImageRepository.create(response.requestId, userId)
+                    withContext(Dispatchers.Main) {
+                        _response.value = styledImage
+                        _status.value = Status.SUCCESS
+                    }
+                }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 _status.value = Status.FAILED
             }
+        }
+    }
+
+    private fun getResult(jobId: String): Flow<StyleTransferResultResponse> {
+        return flow {
+            val result = FitStyleApi.retrofitService.styleTransferResult(jobId)
+            emit(result)
         }
     }
 

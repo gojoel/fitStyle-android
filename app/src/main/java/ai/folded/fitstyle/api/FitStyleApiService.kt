@@ -7,9 +7,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
 import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
@@ -37,7 +34,7 @@ private val moshi = Moshi.Builder()
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(MoshiConverterFactory.create(moshi))
-    .baseUrl(BuildConfig.BASE_URL)
+    .baseUrl("http://192.168.110.128:5000/")
     .client(okHttpClient)
     .build()
 
@@ -52,6 +49,12 @@ interface FitStyleApiService {
                               @Field("custom_style") customStyle: String?,
                               @Field("style_id") styleKey: String?): StyleTransferResponse
 
+    @GET("/api/style_transfer/results/{job_id}")
+    suspend fun styleTransferResult(@Path("job_id") jobId: String): StyleTransferResultResponse
+
+    @FormUrlEncoded
+    @POST("/api/style_transfer/cancel")
+    suspend fun cancelStyleTransferTask(@Field("job_id") jobId: String)
 
     @Headers("Content-Type: application/json")
     @POST("api/create_watermark_payment")
