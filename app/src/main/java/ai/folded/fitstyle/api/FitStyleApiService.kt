@@ -4,6 +4,7 @@ import ai.folded.fitstyle.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -34,7 +35,7 @@ private val moshi = Moshi.Builder()
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(MoshiConverterFactory.create(moshi))
-    .baseUrl("http://192.168.110.128:5000/")
+    .baseUrl(BuildConfig.BASE_URL)
     .client(okHttpClient)
     .build()
 
@@ -42,12 +43,8 @@ private val retrofit = Retrofit.Builder()
  * A public interface that exposes the [getProperties] method
  */
 interface FitStyleApiService {
-    @FormUrlEncoded
     @POST("api/style_transfer")
-    suspend fun styleTransfer(@Field("user_id") userId: String,
-                              @Field("content") content: String,
-                              @Field("custom_style") customStyle: String?,
-                              @Field("style_id") styleKey: String?): StyleTransferResponse
+    suspend fun styleTransfer(@Body body: RequestBody): StyleTransferResponse
 
     @GET("/api/style_transfer/results/{job_id}")
     suspend fun styleTransferResult(@Path("job_id") jobId: String): StyleTransferResultResponse

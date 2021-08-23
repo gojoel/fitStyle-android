@@ -13,14 +13,18 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
 import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
+import android.util.Base64
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
+import android.util.Log
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import okhttp3.FormBody
+import retrofit2.http.Field
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
 
@@ -92,13 +96,20 @@ class StyleTransferViewModel @AssistedInject constructor(
             cancel()
         }
 
+        val builder = FormBody.Builder()
+            .add("user_id", userId)
+            .add("content", encodedPhoto);
+
+        if (encodedCustomStyle != null) {
+            builder.add("custom_style", encodedCustomStyle)
+        }
+
+        if (styleOptions.styleImage?.imageName() != null) {
+            builder.add("style_id", styleOptions.styleImage?.imageName()!!)
+        }
+
         try {
-            val result = FitStyleApi.retrofitService.styleTransfer(
-                userId,
-                encodedPhoto,
-                encodedCustomStyle,
-                styleOptions.styleImage?.imageName()
-            )
+            val result = FitStyleApi.retrofitService.styleTransfer(builder.build())
 
             // track current job in progress
             jobId = result.jobId
