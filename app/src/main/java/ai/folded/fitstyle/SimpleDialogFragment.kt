@@ -17,10 +17,15 @@ class SimpleDialogFragment : DialogFragment() {
 
     private val binding get() = _binding!!
 
-    private val _buttonClick = MutableLiveData<Boolean>()
+    private val _positiveButtonClick = MutableLiveData<Boolean>()
 
-    val buttonClick: LiveData<Boolean>
-        get() = _buttonClick
+    val positiveButtonClick: LiveData<Boolean>
+        get() = _positiveButtonClick
+
+    private val _negativeButtonClick = MutableLiveData<Boolean>()
+
+    val negativeButtonClick: LiveData<Boolean>
+        get() = _negativeButtonClick
 
     companion object {
 
@@ -32,17 +37,21 @@ class SimpleDialogFragment : DialogFragment() {
 
         private const val MESSAGE = "message"
 
-        private const val BUTTON_TITLE = "button_title"
+        private const val POSITIVE_BUTTON_TITLE = "positive_button_title"
+
+        private const val NEGATIVE_BUTTON_TITLE = "negative_button_title"
 
         private const val DISMISSIBLE = "dismissible"
 
-        fun newInstance(messageRes: Int, titleRes: Int?, imageRes: Int?, buttonTitleRes: Int?, dismissible: Boolean = true): SimpleDialogFragment {
+        fun newInstance(messageRes: Int, titleRes: Int?, imageRes: Int? = null, positiveButtonTitleRes: Int?,
+                        negativeButtonTitleRes: Int? = null, dismissible: Boolean = true): SimpleDialogFragment {
             return SimpleDialogFragment().apply {
                 arguments = bundleOf(
                     IMAGE to imageRes,
                     TITLE to titleRes,
                     MESSAGE to messageRes,
-                    BUTTON_TITLE to buttonTitleRes,
+                    POSITIVE_BUTTON_TITLE to positiveButtonTitleRes,
+                    NEGATIVE_BUTTON_TITLE to negativeButtonTitleRes,
                     DISMISSIBLE to dismissible
                 )
             }
@@ -69,6 +78,8 @@ class SimpleDialogFragment : DialogFragment() {
         arguments?.getInt(IMAGE, -1)?.let {
             if (it != -1) {
                 binding.image.setImageResource(it)
+            } else {
+                binding.image.visibility = View.GONE
             }
         }
 
@@ -84,14 +95,25 @@ class SimpleDialogFragment : DialogFragment() {
             }
         }
 
-        arguments?.getInt(BUTTON_TITLE, -1)?.let {
+        arguments?.getInt(POSITIVE_BUTTON_TITLE, -1)?.let {
             if (it != -1) {
                 binding.button.text = getString(it)
             }
         }
 
+        arguments?.getInt(NEGATIVE_BUTTON_TITLE, -1)?.let {
+            if (it != -1) {
+                binding.cancelButton.visibility = View.VISIBLE
+                binding.cancelButton.text = getString(it)
+            }
+        }
+
         binding.button.setOnClickListener {
-            _buttonClick.value = true
+            _positiveButtonClick.value = true
+        }
+
+        binding.cancelButton.setOnClickListener {
+            _negativeButtonClick.value = true
         }
     }
 

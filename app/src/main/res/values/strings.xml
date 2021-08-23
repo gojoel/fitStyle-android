@@ -31,18 +31,24 @@
     <string name="upload_photo_title">Upload a photo</string>
     <string name="upload_photo">Upload Photo</string>
     <string name="upload_photo_details">Choose a photo from your library that you\'d like to style.</string>
+    <string name="permission_denied_title">Permission Denied</string>
+    <string name="gallery_permission_rationale">Access to your storage is necessary so you can choose a photo for styling</string>
+    <string name="gallery_permission_settings_access">You previously declined this permission and must grant access via the app settings on your device.</string>
 
     <string name="select_style_title">Select a style</string>
     <string name="upload_own_style">Upload your own style</string>
 
     <string name="apply_style_title">Styling</string>
-    <string name="style_almost_done">Almost done!</string>
+    <string name="style_almost_done">Almost done!</string>Z
     <string name="style_transfer_details">Applying the style to your photo. This will only take a few seconds…</string>
-
     <string name="styled_image_title">Styled Image</string>
 
     <string name="generic_error_title">Oh no!</string>
     <string name="style_transfer_error">Sorry, we were unable to process your request at this time.</string>
+    <string name="style_transfer_cancel_title">Are you sure?</string>
+    <string name="style_transfer_cancel_details">Navigating back will cancel the current request.</string>
+    <string name="style_transfer_continue">No, continue</string>
+    <string name="style_transfer_confirm_cancel">Yes, cancel</string>
 
     <string name="styled_images_title">My Images</string>
     <string name="empty_images_title">Nothing yet!</string>

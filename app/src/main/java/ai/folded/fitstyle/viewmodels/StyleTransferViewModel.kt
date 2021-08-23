@@ -1,6 +1,7 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
+import ai.folded.fitstyle.api.StyleTransferResultResponse
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
@@ -12,28 +13,33 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
 import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import okhttp3.FormBody
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
 
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
+
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions,
     private val styledImageRepository: StyledImageRepository,
     private val userRepository: UserRepository
 ) : AndroidViewModel(application) {
+
+    @Volatile
+    var jobId: String? = null
 
     private val _status = MutableLiveData<Status?>()
 
@@ -62,6 +68,18 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
+    suspend fun cancelStyleTransfer() = withContext(Dispatchers.IO) {
+        jobId?.let {
+            try {
+                FitStyleApi.retrofitService.cancelStyleTransferTask(it)
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _status.value = Status.FAILED
+                }
+            }
+        }
+    }
+
     private suspend fun callStyleTransfer(userId: String) = withContext(Dispatchers.IO) {
         val photoBitmap = getBitmapFromUri(styleOptions.photoUri)
         val styleBitmap = getBitmapFromUri(styleOptions.customStyleUri)
@@ -78,23 +96,53 @@ class StyleTransferViewModel @AssistedInject constructor(
             cancel()
         }
 
-        try {
-            val result = FitStyleApi.retrofitService.styleTransfer(
-                userId,
-                encodedPhoto,
-                encodedCustomStyle,
-                styleOptions.styleImage?.imageName()
-            )
+        val builder = FormBody.Builder()
+            .add("user_id", userId)
+            .add("content", encodedPhoto);
 
-            val styledImage = styledImageRepository.create(result.requestId, userId)
-            withContext(Dispatchers.Main) {
-                _response.value = styledImage
-                _status.value = Status.SUCCESS
-            }
+        if (encodedCustomStyle != null) {
+            builder.add("custom_style", encodedCustomStyle)
+        }
+
+        if (styleOptions.styleImage?.imageName() != null) {
+            builder.add("style_id", styleOptions.styleImage?.imageName()!!)
+        }
+
+        try {
+            val result = FitStyleApi.retrofitService.styleTransfer(builder.build())
+
+            // track current job in progress
+            jobId = result.jobId
+
+            // continuously attempt to get the results with a retry limit and backoff delay
+            getResult(result.jobId)
+                .flowOn(Dispatchers.Default)
+                .retry (retries = 100) {
+                    delay(5000)
+                    return@retry true
+                }.catch {
+                    withContext(Dispatchers.Main) {
+                        _status.value = Status.FAILED
+                    }
+                }
+                .collect { response ->
+                    val styledImage = styledImageRepository.create(response.requestId, userId)
+                    withContext(Dispatchers.Main) {
+                        _response.value = styledImage
+                        _status.value = Status.SUCCESS
+                    }
+                }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 _status.value = Status.FAILED
             }
+        }
+    }
+
+    private fun getResult(jobId: String): Flow<StyleTransferResultResponse> {
+        return flow {
+            val result = FitStyleApi.retrofitService.styleTransferResult(jobId)
+            emit(result)
         }
     }
 
@@ -111,17 +159,27 @@ class StyleTransferViewModel @AssistedInject constructor(
 
     @Nullable
     private fun getBitmapFromUri(uri: Uri?) : Bitmap? {
-        if (uri == null) return null
-        return try {
-            val source = createSource(getApplication<Application>().contentResolver, uri)
-            decodeBitmap(source)
-        } catch (e: Exception) {
-            null
+        uri?.let {
+            return try {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val source = createSource(getApplication<Application>().contentResolver, uri)
+                    decodeBitmap(source)
+                } else {
+                    MediaStore.Images.Media.getBitmap(
+                        getApplication<Application>().contentResolver,
+                        uri
+                    )
+                }
+            } catch (e: Exception) {
+                null
+            }
         }
+
+        return null
     }
 
-    fun getPhoto() : String {
-        return styleOptions.photoUri?.toString() ?: ""
+    fun getPhoto() : Bitmap? {
+        return getBitmapFromUri(styleOptions.photoUri)
     }
 
     fun getStyleImage() : String {

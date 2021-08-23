@@ -37,7 +37,6 @@ android {
             buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle-dev\""
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL_DEV']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_TEST_PUBLISHABLE_KEY']
-            buildConfigField "String", "STRIPE_ACCOUNT_ID", localProperties['FITSTYLE_STRIPE_ACC_ID']
         }
 
         release {
@@ -47,7 +46,6 @@ android {
             buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle\""
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_PUBLISHABLE_KEY']
-            buildConfigField "String", "STRIPE_ACCOUNT_ID", localProperties['FITSTYLE_STRIPE_ACC_ID']
         }
     }
 
