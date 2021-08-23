@@ -10,6 +10,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +41,14 @@ class UploadPhotoFragment : Fragment() {
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) launchGallery()
-            else showPermissionDeniedDialog()
+            else  {
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // user has denied permission and selected "Never ask again"
+                    showPermissionDeniedWithoutRetry()
+                } else {
+                    showPermissionDeniedDialog()
+                }
+            }
         }
 
     private val openGallery =
@@ -74,7 +82,6 @@ class UploadPhotoFragment : Fragment() {
                 if (PermissionUtils.isStoragePermissionGranted(it)) {
                     launchGallery()
                 } else {
-                    //TODO: check if can request permission
                     requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                 }
             }
@@ -99,6 +106,38 @@ class UploadPhotoFragment : Fragment() {
     }
 
     private fun showPermissionDeniedDialog() {
-        //TODO: handle this
+        val dialog = SimpleDialogFragment.newInstance(
+            R.string.gallery_permission_rationale,
+            R.string.permission_denied_title,
+            R.drawable.ic_warning,
+            R.string.ok,
+        )
+
+        dialog.buttonClick.observe(this) {
+            dialog.dismiss()
+        }
+
+        dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
+    }
+
+    private fun showPermissionDeniedWithoutRetry() {
+        val dialog = SimpleDialogFragment.newInstance(
+            R.string.gallery_permission_settings_access,
+            R.string.permission_denied_title,
+            R.drawable.ic_warning,
+            R.string.ok,
+        )
+
+        dialog.buttonClick.observe(this) {
+            dialog.dismiss()
+            startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+                )
+            )
+        }
+
+        dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
     }
 }

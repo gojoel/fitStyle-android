@@ -31,6 +31,9 @@
     <string name="upload_photo_title">Upload a photo</string>
     <string name="upload_photo">Upload Photo</string>
     <string name="upload_photo_details">Choose a photo from your library that you\'d like to style.</string>
+    <string name="permission_denied_title">Permission Denied</string>
+    <string name="gallery_permission_rationale">Access to your storage is necessary so you can choose a photo for styling</string>
+    <string name="gallery_permission_settings_access">You previously declined this permission and must grant access via the app settings on your device.</string>
 
     <string name="select_style_title">Select a style</string>
     <string name="upload_own_style">Upload your own style</string>
