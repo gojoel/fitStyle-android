@@ -13,10 +13,10 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
 import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
-import android.util.Base64
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Base64.DEFAULT
 import android.util.Base64.encodeToString
-import android.util.Log
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -24,13 +24,13 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.FormBody
-import retrofit2.http.Field
 import java.io.ByteArrayOutputStream
 import javax.annotation.Nullable
 
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
+
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions,
@@ -159,17 +159,27 @@ class StyleTransferViewModel @AssistedInject constructor(
 
     @Nullable
     private fun getBitmapFromUri(uri: Uri?) : Bitmap? {
-        if (uri == null) return null
-        return try {
-            val source = createSource(getApplication<Application>().contentResolver, uri)
-            decodeBitmap(source)
-        } catch (e: Exception) {
-            null
+        uri?.let {
+            return try {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    val source = createSource(getApplication<Application>().contentResolver, uri)
+                    decodeBitmap(source)
+                } else {
+                    MediaStore.Images.Media.getBitmap(
+                        getApplication<Application>().contentResolver,
+                        uri
+                    )
+                }
+            } catch (e: Exception) {
+                null
+            }
         }
+
+        return null
     }
 
-    fun getPhoto() : String {
-        return styleOptions.photoUri?.toString() ?: ""
+    fun getPhoto() : Bitmap? {
+        return getBitmapFromUri(styleOptions.photoUri)
     }
 
     fun getStyleImage() : String {

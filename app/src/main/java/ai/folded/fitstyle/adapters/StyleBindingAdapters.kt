@@ -4,6 +4,7 @@ import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.utils.AwsUtils
 import ai.folded.fitstyle.utils.CustomGlideUrl
 import ai.folded.fitstyle.views.BlurTransformation
+import android.graphics.Bitmap
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -57,5 +58,12 @@ fun bindBlurredStyledImage(view: ImageView, styledImage: StyledImage?) {
                 .transform( BlurTransformation(view.context) )
                 .into(view)
         }
+    }
+}
+
+@BindingAdapter("imageFromBitmap")
+fun bindBitmapImage(view: ImageView, bitmap: Bitmap?) {
+    bitmap?.let {
+        view.setImageBitmap(it)
     }
 }

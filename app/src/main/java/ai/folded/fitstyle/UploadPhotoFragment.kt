@@ -113,7 +113,7 @@ class UploadPhotoFragment : Fragment() {
             R.string.ok,
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
         }
 
@@ -128,7 +128,7 @@ class UploadPhotoFragment : Fragment() {
             R.string.ok,
         )
 
-        dialog.buttonClick.observe(this) {
+        dialog.positiveButtonClick.observe(this) {
             dialog.dismiss()
             startActivity(
                 Intent(
