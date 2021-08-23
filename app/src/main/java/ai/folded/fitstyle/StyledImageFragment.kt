@@ -42,11 +42,19 @@ class StyledImageFragment: Fragment() {
 
         binding.toolbar.setTitle(R.string.styled_image_title)
         binding.toolbar.setNavigationOnClickListener { view ->
-            view.findNavController().navigateUp()
+            if (args.navSource == STYLED_IMG_VIEW_SRC_TRANSFER) {
+                showStyleListFragment()
+            } else {
+                view.findNavController().navigateUp()
+            }
         }
 
         when (args.navSource) {
-            STYLED_IMG_VIEW_SRC_TRANSFER -> {}
+            STYLED_IMG_VIEW_SRC_TRANSFER -> {
+                binding.retryButton.setOnClickListener {
+                    showStyleListFragment()
+                }
+            }
             else -> {
                 binding.retryButton.visibility = View.GONE
             }
@@ -72,5 +80,10 @@ class StyledImageFragment: Fragment() {
         })
 
         return binding.root
+    }
+
+    private fun showStyleListFragment() {
+        this.findNavController().navigate(
+            StyledImageFragmentDirections.actionStyledImageToStyleListFragment())
     }
 }
