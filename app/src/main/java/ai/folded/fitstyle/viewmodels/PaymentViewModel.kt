@@ -49,6 +49,12 @@ internal class PaymentViewModel (
         try {
             val userId = userRepository.getUserId();
             repository.removeWatermark(userId, styledImage.requestId)
+
+            val file = styledImageRepository.createImageFile(getApplication(), styledImage)
+            if (file.exists()) {
+                file.delete()
+            }
+
             styledImage.purchased = true
             styledImageRepository.update(styledImage)
 

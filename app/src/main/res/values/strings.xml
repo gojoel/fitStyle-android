@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">FitStyle</string>
-
+    <string name="file_provider_authority" translatable="false">ai.folded.fitstyle.fileprovider</string>
     <string name="share">Share</string>
     <string name="save">Save</string>
     <string name="settings">Settings</string>
@@ -13,6 +13,8 @@
     <string name="all_set">All Set!</string>
     <string name="view_image">View Image</string>
     <string name="ok">OK</string>
+    <string name="saved">Saved!</string>
+    <string name="saving">Saving…</string>
 
     <string name="create_another">Create Another</string>
     <string name="remove_watermark">Remove Watermark</string>
@@ -57,4 +59,7 @@
 
     <string name="pay_with_google_content_description">Pay with Google</string>
     <string name="pay_with_google">Pay with Google</string>
+
+    <string name="saved_successfully">Image saved!</string>
+    <string name="saved_failed">Failed to save image, please try again</string>
 </resources>
