@@ -7,7 +7,6 @@ import android.app.Application
 import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.lifecycle.*
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.storage.StorageAccessLevel
@@ -18,6 +17,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -31,7 +31,7 @@ import kotlin.coroutines.suspendCoroutine
 class StyledImageViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val imageId: String,
-    val styledImageRepository: StyledImageRepository
+    private val styledImageRepository: StyledImageRepository
 ) : AndroidViewModel(application) {
 
     private val collection =
@@ -39,7 +39,7 @@ class StyledImageViewModel @AssistedInject constructor(
             MediaStore.VOLUME_EXTERNAL
         ) else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
-    val styledImage = styledImageRepository.get(imageId).asLiveData()
+    val styledImage = MutableLiveData<StyledImage>()
 
     private val _downloadStatus = MutableLiveData<Status?>()
 
@@ -51,6 +51,26 @@ class StyledImageViewModel @AssistedInject constructor(
     val shareableImage: LiveData<File?>
         get() = _shareableImage
 
+    var imagePurchased = false
+
+    init {
+        updateStyledImage()
+    }
+
+    fun updateStyledImage() {
+        viewModelScope.launch {
+            styledImageRepository.get(imageId).collect { image ->
+                val currentImage = styledImage.value
+                if (currentImage != null && currentImage.purchased != image.purchased) {
+                    imagePurchased = true
+                }
+
+                if (currentImage == null || currentImage != image) {
+                    styledImage.value = image
+                }
+            }
+        }
+    }
 
     fun shareImage() {
         viewModelScope.launch {
@@ -61,6 +81,7 @@ class StyledImageViewModel @AssistedInject constructor(
                         _shareableImage.value = file
                     } catch (e: Exception) {
                         // TODO: handle exception
+                        _shareableImage.value = null
                     }
                 }
             }

@@ -17,7 +17,7 @@ data class StyledImage(
     val requestId: String,
     val imagePath: String,
     var purchased: Boolean = false,
-    val createdDate: Long = Date().time
+    var updatedAt: Long = Date().time
 ) : Parcelable {
     fun previewImageKey(): String {
         return "$imagePath$PREVIEW_IMAGE_NAME"

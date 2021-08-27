@@ -10,6 +10,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.single
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentViewModel (
@@ -55,6 +56,7 @@ internal class PaymentViewModel (
                 file.delete()
             }
 
+            styledImage.updatedAt = Date().time
             styledImage.purchased = true
             styledImageRepository.update(styledImage)
 

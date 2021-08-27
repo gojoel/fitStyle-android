@@ -7,7 +7,6 @@ import ai.folded.fitstyle.viewmodels.StyledImageViewModel
 import ai.folded.fitstyle.viewmodels.StyledImageViewModelFactory
 import android.content.Intent
 import android.content.Intent.*
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -173,4 +172,10 @@ class StyledImageFragment: Fragment() {
         this.findNavController().navigate(
             StyledImageFragmentDirections.actionStyledImageToStyleListFragment())
     }
+
+    override fun onResume() {
+        super.onResume()
+        styledImageViewModel.updateStyledImage()
+    }
 }
+
