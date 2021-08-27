@@ -8,6 +8,7 @@ import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
 import ai.folded.fitstyle.utils.AwsUtils
+import ai.folded.fitstyle.utils.TRANSFER_RETRIES
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -117,7 +118,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             // continuously attempt to get the results with a retry limit and backoff delay
             getResult(result.jobId)
                 .flowOn(Dispatchers.Default)
-                .retry (retries = 100) {
+                .retry (retries = TRANSFER_RETRIES) {
                     delay(5000)
                     return@retry true
                 }.catch {

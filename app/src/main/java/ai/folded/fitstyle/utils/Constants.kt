@@ -15,7 +15,9 @@ const val COUNTRY_CODE = "US"
 
 const val DATABASE_NAME = "fitstyle-db"
 
+const val URL_FETCHER_TIMEOUT : Int = 15000
 const val URL_EXPIRATION_SEC : Long = 60
+const val TRANSFER_RETRIES = 10L
 
 const val ERROR_TYPE_STYLE_TRANSFER : Int = 0
 

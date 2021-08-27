@@ -1,14 +1,19 @@
 package ai.folded.fitstyle
 
+import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.databinding.FragmentStyledImageBinding
 import ai.folded.fitstyle.utils.STYLED_IMG_VIEW_SRC_TRANSFER
 import ai.folded.fitstyle.viewmodels.StyledImageViewModel
 import ai.folded.fitstyle.viewmodels.StyledImageViewModelFactory
+import android.content.Intent
+import android.content.Intent.*
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
@@ -16,7 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
+import androidx.core.content.FileProvider
 
 @AndroidEntryPoint
 class StyledImageFragment: Fragment() {
@@ -24,6 +29,8 @@ class StyledImageFragment: Fragment() {
 
     @Inject
     lateinit var styledImageViewModelFactory: StyledImageViewModelFactory
+
+    lateinit var binding: FragmentStyledImageBinding
 
     private val styledImageViewModel: StyledImageViewModel by viewModels {
         StyledImageViewModel.provideFactory(styledImageViewModelFactory, args.styledImage.requestId)
@@ -34,7 +41,7 @@ class StyledImageFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding  = FragmentStyledImageBinding.inflate(inflater, container, false)
+        val binding = FragmentStyledImageBinding.inflate(inflater, container, false)
             .apply {
                 viewModel = styledImageViewModel
                 lifecycleOwner = viewLifecycleOwner
@@ -54,8 +61,7 @@ class StyledImageFragment: Fragment() {
                 binding.retryButton.setOnClickListener {
                     showStyleListFragment()
                 }
-            }
-            else -> {
+            } else -> {
                 binding.retryButton.visibility = View.GONE
             }
         }
@@ -63,7 +69,78 @@ class StyledImageFragment: Fragment() {
         binding.purchaseButton.setOnClickListener {
             this.findNavController().navigate(
                 StyledImageFragmentDirections.actionStyledImageToPaymentFragment(args.styledImage))
+            resetSaveButtonState()
         }
+
+        binding.shareButton.setOnClickListener {
+            binding.shareButton.isEnabled = false
+            binding.progressBar.visibility = View.VISIBLE
+
+            // disallow other click events when save is in progress
+            binding.purchaseButton.isClickable = false
+            binding.saveButton.isClickable = false
+
+            styledImageViewModel.shareImage()
+        }
+
+        styledImageViewModel.shareableImage.observe(viewLifecycleOwner, { file ->
+            binding.shareButton.isEnabled = true
+            binding.purchaseButton.isClickable = true
+            binding.saveButton.isClickable = true
+            binding.progressBar.visibility = View.GONE
+
+            file?.let {
+                activity?.let { context ->
+                    val authority = context.getString(R.string.file_provider_authority)
+                    val contentUri = FileProvider.getUriForFile(context, authority, file)
+                    if (contentUri != null) {
+                        val intent = Intent()
+                        intent.action = ACTION_SEND
+                        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.setDataAndType(contentUri, context.contentResolver.getType(contentUri))
+                        intent.putExtra(EXTRA_STREAM, contentUri)
+                        context.startActivity(createChooser(intent, "Choose an app"))
+                    }
+                }
+
+                styledImageViewModel.resetShareableState()
+            }
+        })
+
+        binding.saveButton.setOnClickListener {
+            binding.saveButton.isEnabled = false
+
+            // disallow other click events when save is in progress
+            binding.purchaseButton.isClickable = false
+            binding.shareButton.isClickable = false
+
+            binding.progressBar.visibility = View.VISIBLE
+            binding.saveButton.text = context?.getString(R.string.saving)
+            styledImageViewModel.downloadImage()
+        }
+
+        styledImageViewModel.downloadStatus.observe(viewLifecycleOwner, { status ->
+            binding.saveButton.isEnabled = true
+            binding.purchaseButton.isClickable = true
+            binding.shareButton.isClickable = true
+            binding.progressBar.visibility = View.GONE
+
+            status?.let {
+                activity?.let { context ->
+                    if (it == Status.SUCCESS) {
+                        Toast.makeText(context, context.getString(R.string.saved_successfully), Toast.LENGTH_LONG).show()
+                        binding.saveButton.text = context.getString(R.string.saved)
+                        binding.saveButton.icon = ContextCompat.getDrawable(context, R.drawable.ic_checkmark)
+                        binding.saveButton.isClickable = false
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.saved_failed), Toast.LENGTH_LONG).show()
+                        binding.saveButton.text = context.getString(R.string.save)
+                    }
+                }
+
+                styledImageViewModel.resetSavedState()
+            }
+        })
 
         styledImageViewModel.styledImage.observe(viewLifecycleOwner, {
             if (it.purchased) {
@@ -79,11 +156,26 @@ class StyledImageFragment: Fragment() {
             }
         })
 
+        this.binding = binding
         return binding.root
+    }
+
+    private fun resetSaveButtonState() {
+        context?.let {
+            binding.saveButton.text = it.getString(R.string.save)
+            binding.saveButton.icon = ContextCompat.getDrawable(it, R.drawable.ic_download)
+            binding.saveButton.isClickable = true
+        }
     }
 
     private fun showStyleListFragment() {
         this.findNavController().navigate(
             StyledImageFragmentDirections.actionStyledImageToStyleListFragment())
     }
+
+    override fun onResume() {
+        super.onResume()
+        styledImageViewModel.updateStyledImage()
+    }
 }
+
