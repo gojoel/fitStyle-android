@@ -75,14 +75,12 @@ class StyledImageViewModel @AssistedInject constructor(
     fun shareImage() {
         viewModelScope.launch {
             styledImage.value?.let { styledImage ->
-                suspend {
-                    try {
-                        val file = downloadS3Image(styledImage)
-                        _shareableImage.value = file
-                    } catch (e: Exception) {
-                        // TODO: handle exception
-                        _shareableImage.value = null
-                    }
+                try {
+                    val file = downloadS3Image(styledImage)
+                    _shareableImage.value = file
+                } catch (e: Exception) {
+                    // TODO: handle exception
+                    _shareableImage.value = null
                 }
             }
         }
@@ -91,9 +89,7 @@ class StyledImageViewModel @AssistedInject constructor(
     fun downloadImage() {
         viewModelScope.launch {
             styledImage.value?.let { styledImage ->
-                suspend {
-                    downloadQ(styledImage)
-                }
+                downloadQ(styledImage)
             }
         }
     }
