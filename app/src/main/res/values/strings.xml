@@ -15,6 +15,7 @@
     <string name="ok">OK</string>
     <string name="saved">Saved!</string>
     <string name="saving">Saving…</string>
+    <string name="home">Home</string>
 
     <string name="create_another">Create Another</string>
     <string name="remove_watermark">Remove Watermark</string>

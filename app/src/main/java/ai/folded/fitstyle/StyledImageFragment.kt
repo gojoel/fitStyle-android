@@ -22,6 +22,7 @@ import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.core.content.FileProvider
+import androidx.navigation.ui.onNavDestinationSelected
 
 @AndroidEntryPoint
 class StyledImageFragment: Fragment() {
@@ -58,10 +59,16 @@ class StyledImageFragment: Fragment() {
 
         when (args.navSource) {
             STYLED_IMG_VIEW_SRC_TRANSFER -> {
+                binding.toolbar.inflateMenu(R.menu.home_menu)
+                binding.toolbar.setOnMenuItemClickListener { menuItem ->
+                    menuItem.onNavDestinationSelected(requireView().findNavController())
+                }
+
                 binding.retryButton.setOnClickListener {
                     showStyleListFragment()
                 }
-            } else -> {
+            }
+            else -> {
                 binding.retryButton.visibility = View.GONE
             }
         }
