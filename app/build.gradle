@@ -102,6 +102,7 @@ dependencies {
     implementation "com.facebook.shimmer:shimmer:$rootProject.shimmerVersion"
     implementation "com.google.android.gms:play-services-wallet:$rootProject.walletVersion"
     implementation "com.stripe:stripe-android:$rootProject.stripeVersion"
+    implementation "commons-io:commons-io:$rootProject.commonsIoVersion"
 
     // Firebase
     implementation platform("com.google.firebase:firebase-bom:$rootProject.firebaseBomVersion")

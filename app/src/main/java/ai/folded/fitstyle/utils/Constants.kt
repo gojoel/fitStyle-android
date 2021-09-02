@@ -14,6 +14,7 @@ const val CURRENCY = "usd"
 const val COUNTRY_CODE = "US"
 
 const val DATABASE_NAME = "fitstyle-db"
+const val CACHE_DIR_CHILD = "images"
 
 const val URL_FETCHER_TIMEOUT : Int = 15000
 const val URL_EXPIRATION_SEC : Long = 60

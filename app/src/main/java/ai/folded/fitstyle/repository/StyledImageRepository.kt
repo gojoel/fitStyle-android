@@ -4,6 +4,7 @@ import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.data.StyledImageDao
 import ai.folded.fitstyle.utils.BUCKET_PRIVATE_PREFIX
 import ai.folded.fitstyle.utils.BUCKET_REQUESTS
+import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
 import kotlinx.coroutines.flow.Flow
 import android.content.Context
 import java.io.File
@@ -37,7 +38,7 @@ class StyledImageRepository @Inject constructor(
     suspend fun clear() = styledImageDao.clear()
 
     fun createImageFile(context: Context, styledImage: StyledImage): File {
-        val cachePath = File(context.cacheDir, "images")
+        val cachePath = File(context.cacheDir, CACHE_DIR_CHILD)
         cachePath.mkdirs()
         return File("$cachePath/${styledImage.requestId}.jpg")
     }
