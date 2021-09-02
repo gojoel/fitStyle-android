@@ -106,7 +106,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    app:imageFromUrl="@{viewModel.getStyleImage()}" />
+                    app:styleImage="@{viewModel.styleOptions.styleImage}"
+                    app:imageFromBitmap="@{viewModel.getStyleImageBitmap()}"/>
 
             </ai.folded.fitstyle.views.MaskedCardView>
 

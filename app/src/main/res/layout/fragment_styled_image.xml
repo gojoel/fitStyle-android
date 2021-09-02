@@ -22,34 +22,42 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/result_card_view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/margin_normal"
-            android:maxWidth="500dp"
-            app:cardCornerRadius="16dp"
-            app:layout_constraintWidth_percent="0.90"
-            app:layout_constraintDimensionRatio="1:1"
+        <FrameLayout
+            android:id="@+id/result_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            app:layout_constrainedHeight="true"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintVertical_chainStyle="spread"
             app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintBottom_toTopOf="@+id/button_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <ImageView
+
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/result_image_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                app:shapeAppearanceOverlay="@style/roundedCorners"
                 app:styledImage="@{viewModel.styledImage}"/>
 
-        </androidx.cardview.widget.CardView>
+        </FrameLayout>
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/button_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginEnd="@dimen/margin_normal"
-            app:layout_constraintTop_toBottomOf="@+id/result_card_view"
+            android:layout_marginBottom="@dimen/margin_normal"
+            app:layout_constraintVertical_chainStyle="spread"
+            app:layout_constraintTop_toBottomOf="@+id/result_container"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">

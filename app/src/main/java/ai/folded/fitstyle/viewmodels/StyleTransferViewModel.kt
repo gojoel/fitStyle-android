@@ -192,12 +192,8 @@ class StyleTransferViewModel @AssistedInject constructor(
         return getBitmapFromUri(styleOptions.photoUri)
     }
 
-    fun getStyleImage() : String {
-        return styleOptions.styleImage?.let {
-            AwsUtils.generateUrl(it.key)?.toString() ?: ""
-        } ?: run {
-            styleOptions.customStyleUri?.toString() ?: ""
-        }
+    fun getStyleImageBitmap(): Bitmap? {
+      return getBitmapFromUri(styleOptions.customStyleUri)
     }
 
     fun clearTransferState() {

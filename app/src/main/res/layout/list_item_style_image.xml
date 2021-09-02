@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/reference_item_image_height"
                 android:scaleType="centerCrop"
-                app:styleImage="@{style.key}"
+                app:styleImage="@{style}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
