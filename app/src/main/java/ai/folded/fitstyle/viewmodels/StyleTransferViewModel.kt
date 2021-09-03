@@ -69,7 +69,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                 callStyleTransfer(userId)
             } catch (e: Exception) {
                 // TODO: handle and log error
-                _status.value = Status.FAILED
+                setFailedStatus()
             }
         }
     }
@@ -79,9 +79,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             try {
                 FitStyleApi.retrofitService.cancelStyleTransferTask(it)
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    _status.value = Status.FAILED
-                }
+                setFailedStatus()
             }
         }
     }
@@ -116,22 +114,26 @@ class StyleTransferViewModel @AssistedInject constructor(
                     delay(5000)
                     return@retry true
                 }.catch {
-                    withContext(Dispatchers.Main) {
-                        _status.value = Status.FAILED
-                    }
+                    setFailedStatus()
                 }
                 .collect { response ->
-                    val styledImage = styledImageRepository.create(response.requestId, userId)
-                    withContext(Dispatchers.Main) {
-                        _response.value = styledImage
-                        _status.value = Status.SUCCESS
+                    if (response.requestId == null) {
+                        setFailedStatus()
+                    } else {
+                        val styledImage = styledImageRepository.create(response.requestId, userId)
+                        withContext(Dispatchers.Main) {
+                            _response.value = styledImage
+                            _status.value = Status.SUCCESS
+                        }
                     }
                 }
         } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                _status.value = Status.FAILED
-            }
+            setFailedStatus()
         }
+    }
+
+    private suspend fun setFailedStatus() = withContext(Dispatchers.Main) {
+        _status.value = Status.FAILED
     }
 
     private fun getResult(jobId: String): Flow<StyleTransferResultResponse> {
