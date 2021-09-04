@@ -7,6 +7,7 @@ import ai.folded.fitstyle.viewmodels.StyledImageViewModel
 import ai.folded.fitstyle.viewmodels.StyledImageViewModelFactory
 import android.content.Intent
 import android.content.Intent.*
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.core.content.FileProvider
 import androidx.navigation.ui.onNavDestinationSelected
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.facebook.shimmer.ShimmerFrameLayout
 
 @AndroidEntryPoint
 class StyledImageFragment: Fragment() {
@@ -156,6 +164,36 @@ class StyledImageFragment: Fragment() {
         })
 
         styledImageViewModel.styledImage.observe(viewLifecycleOwner, {
+
+            showLoadingImage(binding.shimmerView, true)
+            Glide.with(binding.resultImageView.context)
+                .load(it)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .listener(object: RequestListener<Drawable>{
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        showLoadingImage(binding.shimmerView, false)
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        showLoadingImage(binding.shimmerView, false)
+                        return false
+                    }
+                })
+                .into(binding.resultImageView)
+
+
             if (it.purchased) {
                 binding.purchaseButton.visibility = View.GONE
 
@@ -171,6 +209,16 @@ class StyledImageFragment: Fragment() {
 
         this.binding = binding
         return binding.root
+    }
+
+    private fun showLoadingImage(shimmerView: ShimmerFrameLayout, visible: Boolean) {
+        if (visible) {
+            shimmerView.visibility = View.VISIBLE
+            shimmerView.startShimmer()
+        } else {
+            shimmerView.visibility = View.GONE
+            shimmerView.stopShimmer()
+        }
     }
 
     private fun onBackPressed() {

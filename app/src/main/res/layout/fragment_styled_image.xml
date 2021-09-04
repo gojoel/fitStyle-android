@@ -22,12 +22,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_view"
+            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_margin="@dimen/margin_normal"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintBottom_toTopOf="@+id/button_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardCornerRadius="16dp"/>
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
         <FrameLayout
             android:id="@+id/result_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
             app:layout_constrainedHeight="true"
             app:layout_constrainedWidth="true"
             app:layout_constraintVertical_chainStyle="spread"
@@ -36,16 +54,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/result_image_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
-                app:shapeAppearanceOverlay="@style/roundedCorners"
-                app:styledImage="@{viewModel.styledImage}"/>
-
+                app:shapeAppearanceOverlay="@style/roundedCorners"/>
         </FrameLayout>
 
 
