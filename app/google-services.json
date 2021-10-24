@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "155448364233",
+    "project_id": "fitstyle-aaa6d",
+    "storage_bucket": "fitstyle-aaa6d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:155448364233:android:8c9e0a44dfdbb3ef771118",
+        "android_client_info": {
+          "package_name": "ai.folded.fitstyle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "155448364233-5nfal3c41qkcbk7obpo19ht4ofe6ttmk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRbygU-O87J_7JHhttub6-vlk4u0iIBOs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "155448364233-5nfal3c41qkcbk7obpo19ht4ofe6ttmk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
