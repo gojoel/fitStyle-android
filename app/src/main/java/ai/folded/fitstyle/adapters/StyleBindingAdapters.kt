@@ -14,7 +14,9 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 @BindingAdapter("styleImage")
 fun bindStyleImage(view: ImageView, styleImage: StyleImage?) {
     styleImage?.let {
-        val url = AwsUtils.generateUrl(it.key)
+        val url = styleImage.url ?: AwsUtils.generateUrl(it.key)
+        styleImage.url = url
+
         Glide.with(view.context)
             .load(url.toString())
             .transition(DrawableTransitionOptions.withCrossFade())
