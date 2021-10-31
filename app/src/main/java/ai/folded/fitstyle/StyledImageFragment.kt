@@ -26,7 +26,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import androidx.core.content.FileProvider
 import androidx.databinding.library.BuildConfig
-import androidx.navigation.ui.onNavDestinationSelected
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -115,11 +114,6 @@ class StyledImageFragment: Fragment() {
 
         when (args.navSource) {
             STYLED_IMG_VIEW_SRC_TRANSFER -> {
-                binding.toolbar.inflateMenu(R.menu.home_menu)
-                binding.toolbar.setOnMenuItemClickListener { menuItem ->
-                    menuItem.onNavDestinationSelected(requireView().findNavController())
-                }
-
                 binding.retryButton.setOnClickListener {
                     showStyleListFragment()
                 }
