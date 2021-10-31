@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FitStyle</string>
+    <string name="app_name">Fitstyle</string>
     <string name="file_provider_authority" translatable="false">ai.folded.fitstyle.fileprovider</string>
     <string name="share">Share</string>
     <string name="save">Save</string>
@@ -15,6 +15,7 @@
     <string name="ok">OK</string>
     <string name="saved">Saved!</string>
     <string name="saving">Saving…</string>
+    <string name="email_subject">Fitstyle App Feedback</string>
 
     <string name="create_another">Create Another</string>
     <string name="remove_watermark">Remove Watermark</string>
@@ -63,4 +64,10 @@
 
     <string name="saved_successfully">Image saved!</string>
     <string name="saved_failed">Failed to save image, please try again</string>
+
+    <!-- Settings -->
+    <string name="user_id">User Id</string>
+    <string name="version">Version</string>
+    <string name="feedback">Send Feedback</string>
+    <string name="feedback_details">Report technical issues or suggest new features</string>
 </resources>

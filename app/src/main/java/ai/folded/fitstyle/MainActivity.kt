@@ -1,10 +1,15 @@
 package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.ActivityMainBinding
+import ai.folded.fitstyle.utils.PREF_KEY_USER_ID
 import ai.folded.fitstyle.viewmodels.MainViewModel
+import android.content.Context
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil.setContentView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.NavHostFragment
@@ -34,6 +39,15 @@ class MainActivity : BaseActivity() {
 
         firebaseAnalytics = Firebase.analytics
         setupNavigationListener()
+
+        viewModel.userId.observe(this, { userId ->
+            if (userId.isNotEmpty()) {
+                with (this.getPreferences(Context.MODE_PRIVATE).edit()) {
+                    putString(PREF_KEY_USER_ID, userId)
+                    apply()
+                }
+            }
+        })
 
         viewModel.fetchUser()
     }

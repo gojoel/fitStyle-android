@@ -26,6 +26,14 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
 
+        <action
+            android:id="@+id/action_welcome_to_settings_fragment"
+            app:destination="@id/settings_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
     </fragment>
 
     <fragment
@@ -160,6 +168,11 @@
             app:enterAnim="@anim/slide_in_left"
             app:exitAnim="@anim/slide_out_right"/>
 
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="ai.folded.fitstyle.SettingsFragment">
     </fragment>
 
 </navigation>

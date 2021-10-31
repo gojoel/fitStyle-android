@@ -72,6 +72,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$rootProject.roomVersion"
     kapt "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"
+    implementation "androidx.preference:preference:$rootProject.appCompatVersion"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"

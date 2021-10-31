@@ -30,6 +30,11 @@ class WelcomeFragment: Fragment() {
                 WelcomeFragmentDirections.actionWelcomeToStyledImagesFragment())
         }
 
+        binding.settingsClickListener = View.OnClickListener {
+            this.findNavController().navigate(
+                WelcomeFragmentDirections.actionWelcomeToSettingsFragment())
+        }
+
         setHasOptionsMenu(true)
         return binding.root
     }
