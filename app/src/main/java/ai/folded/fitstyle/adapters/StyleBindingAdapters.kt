@@ -32,20 +32,6 @@ fun bindStyledImage(view: ImageView, styledImage: StyledImage?) {
     }
 }
 
-@BindingAdapter("blurredStyledImage")
-fun bindBlurredStyledImage(view: ImageView, styledImage: StyledImage?) {
-    styledImage?.let {
-        if (!it.imageKey().isNullOrEmpty()) {
-            val url = AwsUtils.generateUrl(it.previewImageKey())
-            Glide.with(view.context)
-                .load(CustomGlideUrl(url.toString()))
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .transform( BlurTransformation(view.context) )
-                .into(view)
-        }
-    }
-}
-
 @BindingAdapter("imageFromBitmap")
 fun bindBitmapImage(view: ImageView, bitmap: Bitmap?) {
     bitmap?.let {

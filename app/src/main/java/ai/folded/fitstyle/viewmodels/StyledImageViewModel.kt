@@ -1,8 +1,11 @@
 package ai.folded.fitstyle.viewmodels
 
+import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyledImage
+import ai.folded.fitstyle.repository.PaymentRepository
 import ai.folded.fitstyle.repository.StyledImageRepository
+import ai.folded.fitstyle.repository.UserRepository
 import android.app.Application
 import android.content.ContentValues
 import android.os.Build
@@ -18,9 +21,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.single
 import java.io.File
 import java.io.IOException
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -31,7 +36,9 @@ import kotlin.coroutines.suspendCoroutine
 class StyledImageViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val imageId: String,
-    private val styledImageRepository: StyledImageRepository
+    private val paymentRepository: PaymentRepository,
+    private val styledImageRepository: StyledImageRepository,
+    private val userRepository: UserRepository
 ) : AndroidViewModel(application) {
 
     private val collection =
@@ -51,7 +58,9 @@ class StyledImageViewModel @AssistedInject constructor(
     val shareableImage: LiveData<File?>
         get() = _shareableImage
 
-    var imagePurchased = false
+    val paymentProgress = MutableLiveData<Boolean>()
+
+    val paymentStatus = MutableLiveData<Status>()
 
     init {
         updateStyledImage()
@@ -60,14 +69,7 @@ class StyledImageViewModel @AssistedInject constructor(
     fun updateStyledImage() {
         viewModelScope.launch {
             styledImageRepository.get(imageId).collect { image ->
-                val currentImage = styledImage.value
-                if (currentImage != null && currentImage.purchased != image.purchased) {
-                    imagePurchased = true
-                }
-
-                if (currentImage == null || currentImage != image) {
-                    styledImage.value = image
-                }
+                styledImage.value = image
             }
         }
     }
@@ -167,11 +169,65 @@ class StyledImageViewModel @AssistedInject constructor(
         }
     }
 
+    fun preparePaymentRequest() = liveData {
+        paymentProgress.postValue(true)
+        paymentStatus.postValue(Status.WAITING)
+
+        val userId = userRepository.getUserId();
+        val paymentResponse = paymentRepository.createWatermarkPayment(userId, styledImage.value!!.requestId).single()
+
+        paymentResponse.fold(
+            onSuccess = {
+                paymentStatus.postValue(Status.SUCCESS)
+            },
+            onFailure = {
+                paymentStatus.postValue(Status.FAILED)
+            }
+        )
+
+        paymentProgress.postValue(false)
+        emit(paymentResponse.getOrNull())
+    }
+
+    fun removeWatermark(styledImage: StyledImage) = liveData {
+        paymentProgress.postValue(true)
+
+        var successful = false
+        try {
+            val userId = userRepository.getUserId();
+            paymentRepository.removeWatermark(userId, styledImage.requestId)
+
+            val file = styledImageRepository.createImageFile(getApplication(), styledImage)
+            if (file.exists()) {
+                file.delete()
+            }
+
+            styledImage.updatedAt = Date().time
+            styledImage.purchased = true
+            styledImageRepository.update(styledImage)
+
+            successful = true
+
+        } catch (e: Exception) {
+            // TODO: log exception
+        }
+
+        paymentProgress.postValue(false)
+
+        emit(
+            if (successful) {
+                Status.SUCCESS
+            } else {
+                Status.FAILED
+            }
+        )
+    }
+
     companion object {
         fun provideFactory(
             assistedFactory: StyledImageViewModelFactory,
-            imageId: String
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            imageId: String,
+            ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return assistedFactory.create(imageId) as T
