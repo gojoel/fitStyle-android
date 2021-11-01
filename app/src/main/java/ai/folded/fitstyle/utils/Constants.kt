@@ -21,6 +21,7 @@ const val CONTACT_EMAIL = "foldedai@gmail.com"
 const val URL_FETCHER_TIMEOUT : Int = 15000
 const val URL_EXPIRATION_SEC : Long = 10800 // 3 hrs
 const val TRANSFER_RETRIES = 10L
+const val MAX_IMAGE_SIZE = 1500
 
 const val ERROR_TYPE_STYLE_TRANSFER : Int = 0
 

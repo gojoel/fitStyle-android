@@ -8,6 +8,7 @@ import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
 import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
+import ai.folded.fitstyle.utils.MAX_IMAGE_SIZE
 import ai.folded.fitstyle.utils.TRANSFER_RETRIES
 import android.app.Application
 import android.graphics.Bitmap
@@ -17,6 +18,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.graphics.BitmapCompat
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -25,12 +27,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import org.apache.commons.io.IOUtils
 import java.io.File
 import javax.annotation.Nullable
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.FileOutputStream
 
 
 /**
@@ -85,11 +87,11 @@ class StyleTransferViewModel @AssistedInject constructor(
     }
 
     private suspend fun callStyleTransfer(userId: String) = withContext(Dispatchers.IO) {
-        val contentFile = getFileRequestBody(styleOptions.photoUri, "content")
+        val contentFile = getFileRequestBody(getPhoto(), "content")
         var styleFile: MultipartBody.Part? = null
 
-        styleOptions.customStyleUri?.let { styleUri ->
-            styleFile = getFileRequestBody(styleUri, "custom_style")
+        styleOptions.customStyleUri?.let {
+            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style")
         }
 
         val textMediaType = "text/plain".toMediaType()
@@ -143,22 +145,22 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getFileRequestBody(uri: Uri?, fileKey: String): MultipartBody.Part? {
-        val fileUri = uri ?: return null
-        val cachePath = File(getApplication<Application>().cacheDir, CACHE_DIR_CHILD)
-        cachePath.mkdirs()
+    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String): MultipartBody.Part? {
+        var bm = bitmap ?: return null
 
-        val file = File("$cachePath/$fileKey.jpg")
-        val resolver = getApplication<Application>().contentResolver
         try {
-            resolver.openInputStream(fileUri)
-                .use { inputStream ->
-                    inputStream?.let {
-                        file.outputStream().use { outputStream ->
-                            IOUtils.copy(it, outputStream)
-                        }
-                    }
-                }
+            val cachePath = File(getApplication<Application>().cacheDir, CACHE_DIR_CHILD)
+            cachePath.mkdirs()
+
+            val file = File("$cachePath/$fileKey.jpg")
+
+            if (bm.width > MAX_IMAGE_SIZE || bm.height > MAX_IMAGE_SIZE) {
+                bm = resize(bm, MAX_IMAGE_SIZE, MAX_IMAGE_SIZE)
+            }
+
+            FileOutputStream(file).use { out ->
+                bm.compress(Bitmap.CompressFormat.JPEG, 75, out)
+            }
 
             val imageFileType = "image/*".toMediaType()
             val requestFile = file.asRequestBody(imageFileType)
@@ -190,12 +192,32 @@ class StyleTransferViewModel @AssistedInject constructor(
         return null
     }
 
+    private fun resize(image: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        return if (maxHeight > 0 && maxWidth > 0) {
+            val width = image.width
+            val height = image.height
+            val ratioBitmap = width.toFloat() / height.toFloat()
+            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+            var finalWidth = maxWidth
+            var finalHeight = maxHeight
+            if (ratioMax > ratioBitmap) {
+                finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+            } else {
+                finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+            }
+
+            Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+        } else {
+            image
+        }
+    }
+
     fun getPhoto() : Bitmap? {
         return getBitmapFromUri(styleOptions.photoUri)
     }
 
     fun getStyleImageBitmap(): Bitmap? {
-      return getBitmapFromUri(styleOptions.customStyleUri)
+        return getBitmapFromUri(styleOptions.customStyleUri)
     }
 
     fun clearTransferState() {
