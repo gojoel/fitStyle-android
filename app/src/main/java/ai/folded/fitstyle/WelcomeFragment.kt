@@ -1,6 +1,8 @@
 package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.FragmentWelcomeBinding
+import ai.folded.fitstyle.utils.PREF_COMPLETED_TUTORIAL
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -37,5 +39,18 @@ class WelcomeFragment: Fragment() {
 
         setHasOptionsMenu(true)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (!completedTutorial()) {
+            this.findNavController().navigate(
+                WelcomeFragmentDirections.actionWelcomeToTutorialFragment())
+        }
+    }
+
+    private fun completedTutorial(): Boolean {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+        return sharedPref?.getBoolean(PREF_COMPLETED_TUTORIAL, false) ?: false
     }
 }

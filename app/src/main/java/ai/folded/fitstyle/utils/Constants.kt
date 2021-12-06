@@ -27,3 +27,6 @@ const val ERROR_TYPE_STYLE_TRANSFER : Int = 0
 
 const val STYLED_IMG_VIEW_SRC_DEFAULT = 0
 const val STYLED_IMG_VIEW_SRC_TRANSFER = 1
+
+// shared preferences
+const val PREF_COMPLETED_TUTORIAL = "pref_completed_tutorial"
