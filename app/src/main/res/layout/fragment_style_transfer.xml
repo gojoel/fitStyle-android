@@ -78,6 +78,8 @@
                 app:cardPreventCornerOverlap="false"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.FitStyle.Card"
                 tools:cardBackgroundColor="?attr/colorPrimary"
+                app:strokeWidth="@dimen/image_border_size"
+                app:strokeColor="@android:color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
                 <ImageView
@@ -97,6 +99,8 @@
                 app:cardElevation="@dimen/card_elevation"
                 app:cardPreventCornerOverlap="false"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.FitStyle.Card"
+                app:strokeWidth="@dimen/image_border_size"
+                app:strokeColor="@android:color/white"
                 tools:cardBackgroundColor="@color/teal_700"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
