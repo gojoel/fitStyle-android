@@ -68,6 +68,13 @@
     <!-- Settings -->
     <string name="user_id">User Id</string>
     <string name="version">Version</string>
-    <string name="feedback">Send Feedback</string>
+    <string name="feedback_section">Feedback</string>
+    <string name="feedback">Send Us Feedback</string>
     <string name="feedback_details">Report technical issues or suggest new features</string>
+
+    <string name="info_section">More Information</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_link" translatable="false">https://foldedai.com/#privacy</string>
+    <string name="credits">Credits</string>
+    <string name="credits_link" translatable="false">https://foldedai.com/#credits</string>
 </resources>

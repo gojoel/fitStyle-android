@@ -22,5 +22,4 @@
     <dimen name="overlap_image_size">156dp</dimen>
     <dimen name="overlap_image_half_size">78dp</dimen>
 
-    <dimen name="settings_item_height">75dp</dimen>
 </resources>
