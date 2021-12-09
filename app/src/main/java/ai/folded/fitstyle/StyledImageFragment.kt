@@ -271,24 +271,20 @@ class StyledImageFragment: Fragment() {
         paymentSheetResult: PaymentSheetResult
     ) {
         when(paymentSheetResult) {
-            is PaymentSheetResult.Canceled -> {
-                updatePurchaseButtonState(false)
-            }
-            is PaymentSheetResult.Failed -> {
-                updatePurchaseButtonState(false)
-                showPaymentFailureDialog()
-            }
+            is PaymentSheetResult.Canceled -> {}
+            is PaymentSheetResult.Failed -> { showPaymentFailureDialog() }
             is PaymentSheetResult.Completed -> {
                 styledImageViewModel.removeWatermark(args.styledImage).observe(this) { status ->
                     if (status == Status.SUCCESS) {
                         showSuccessDialog()
                     } else {
-                        updatePurchaseButtonState(false)
                         showPaymentFailureDialog(R.string.oh_no, R.string.remove_watermark_failed)
                     }
                 }
             }
         }
+
+        updatePurchaseButtonState(false)
     }
 
     private fun showSuccessDialog() {
