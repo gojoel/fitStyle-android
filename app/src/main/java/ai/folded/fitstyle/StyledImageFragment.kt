@@ -149,7 +149,7 @@ class StyledImageFragment: Fragment() {
                     if (contentUri != null) {
                         val intent = Intent()
                         intent.action = ACTION_SEND
-                        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+                        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION or FLAG_GRANT_WRITE_URI_PERMISSION)
                         intent.setDataAndType(contentUri, context.contentResolver.getType(contentUri))
                         intent.putExtra(EXTRA_STREAM, contentUri)
                         intent.type = "image/png"
