@@ -34,6 +34,14 @@ android {
         }
     }
 
+    signingConfigs {
+        signRelease {
+            storeFile file(FITSTYLE_STORE_FILE)
+            storePassword FITSTYLE_STORE_PASS
+            keyAlias FITSTYLE_KEY_ALIAS
+            keyPassword FITSTYLE_KEY_PASS
+        }
+    }
 
     buildTypes {
         debug {
@@ -45,6 +53,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signRelease
 
             buildConfigField "String", "BUCKET_NAME", localProperties['BUCKET_NAME']
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL']
