@@ -34,9 +34,10 @@ android {
         }
     }
 
+
     buildTypes {
         debug {
-            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle-dev\""
+            buildConfigField "String", "BUCKET_NAME", localProperties['BUCKET_NAME_DEV']
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL_DEV']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_TEST_PUBLISHABLE_KEY']
         }
@@ -45,7 +46,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle\""
+            buildConfigField "String", "BUCKET_NAME", localProperties['BUCKET_NAME']
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_PUBLISHABLE_KEY']
         }
