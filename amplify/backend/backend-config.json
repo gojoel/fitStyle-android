@@ -9,7 +9,7 @@
     }
   },
   "storage": {
-    "fitstylec14beb30": {
+    "fitstyle4d778737": {
       "service": "S3",
       "serviceType": "imported",
       "providerPlugin": "awscloudformation",

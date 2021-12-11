@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FitStyle</string>
+    <string name="app_name">Fitstyle</string>
     <string name="file_provider_authority" translatable="false">ai.folded.fitstyle.fileprovider</string>
     <string name="share">Share</string>
     <string name="save">Save</string>
@@ -15,10 +15,14 @@
     <string name="ok">OK</string>
     <string name="saved">Saved!</string>
     <string name="saving">Saving…</string>
-    <string name="home">Home</string>
+    <string name="email_subject">Fitstyle App Feedback</string>
+    <string name="continue_title">Continue</string>
+    <string name="start">Start</string>
+    <string name="complete">Complete</string>
 
     <string name="create_another">Create Another</string>
     <string name="remove_watermark">Remove Watermark</string>
+    <string name="removing_watermark">Removing watermark…</string>
     <string name="watermark_removal_purchase_details">Would you like to remove the watermarking on this image for just $1?</string>
     <string name="remove_watermark_confirmation">Purchase Removal</string>
     <string name="status_preparing_purchase">Preparing purchase…</string>
@@ -43,7 +47,7 @@
 
     <string name="apply_style_title">Styling</string>
     <string name="style_almost_done">Almost done!</string>Z
-    <string name="style_transfer_details">Applying the style to your photo. This will only take a few seconds…</string>
+    <string name="style_transfer_details">Applying the style to your photo.\nThis will only take a couple of seconds.</string>
     <string name="styled_image_title">Styled Image</string>
 
     <string name="generic_error_title">Oh no!</string>
@@ -63,4 +67,32 @@
 
     <string name="saved_successfully">Image saved!</string>
     <string name="saved_failed">Failed to save image, please try again</string>
+
+    <!-- Settings -->
+    <string name="user_id">User Id</string>
+    <string name="version">Version</string>
+    <string name="feedback_section">Feedback</string>
+    <string name="feedback">Send Us Feedback</string>
+    <string name="feedback_details">Report technical issues or suggest new features</string>
+
+    <string name="info_section">More Information</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_link" translatable="false">https://foldedai.com/#privacy</string>
+    <string name="credits">Credits</string>
+    <string name="credits_link" translatable="false">https://foldedai.com/#credits</string>
+
+
+    <!-- Tutorial -->
+    <string name="page_one_title">Welcome! &#128075;</string>
+    <string name="page_two_title">How does it work? &#129300;</string>
+    <string name="page_three_title">Select a style &#127912;</string>
+    <string name="page_four_title">Choose a photo &#128248;</string>
+    <string name="page_five_title">Voilà! &#127881;</string>
+
+    <string name="page_one_details">Thank you for downloading the Fitstyle app!\nHere is a quick tutorial on how the app works and how to use it.</string>
+    <string name="page_two_details">Fitstyle is a filter that takes two images, a photo (ideally a full body portrait) and a style image (like a painting), and combines the two to create a unique image. Our filter applies the style\’s look to the background of the photo, keeping the person unfiltered.\n\nThis is done in two simple steps… &#128073;</string>
+    <string name="page_three_details">Pick from a list of different artworks or upload your own image.</string>
+    <string name="page_four_details">From your gallery, choose a photo that you\'d like to style.</string>
+    <string name="page_five_details">That\'s all there is to it!\nThe resulting image will be automatically saved in the app and accessible via the \'My Images\' option on the home screen.</string>
+
 </resources>

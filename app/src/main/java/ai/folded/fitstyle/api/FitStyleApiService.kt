@@ -3,6 +3,7 @@ package ai.folded.fitstyle.api
 import ai.folded.fitstyle.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -43,8 +44,13 @@ private val retrofit = Retrofit.Builder()
  * A public interface that exposes the [getProperties] method
  */
 interface FitStyleApiService {
+    @Multipart
     @POST("api/style_transfer")
-    suspend fun styleTransfer(@Body body: RequestBody): StyleTransferResponse
+    suspend fun styleTransfer(
+        @Part("user_id") userId: RequestBody,
+        @Part contentImage: MultipartBody.Part,
+        @Part("style_id") styleId: RequestBody?,
+        @Part styleImage: MultipartBody.Part?): StyleTransferResponse
 
     @GET("/api/style_transfer/results/{job_id}")
     suspend fun styleTransferResult(@Path("job_id") jobId: String): StyleTransferResultResponse

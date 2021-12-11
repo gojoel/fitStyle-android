@@ -17,7 +17,7 @@ data class PaymentRequest(
 
 data class PaymentResponse(
     @Json(name = "publishableKey")
-    val publishableKey: String,
+    val publishableKey: String?,
     @Json(name = "clientSecret")
     val clientSecret: String,
     @Json(name = "customerId")

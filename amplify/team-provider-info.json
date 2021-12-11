@@ -19,16 +19,16 @@
           "webClientId": "cpftrfvp3i1s5smhl58aecibh",
           "nativeClientId": "cpftrfvp3i1s5smhl58aecibh",
           "identityPoolId": "us-east-2:6666840b-923f-4c9e-8656-ecf89876d31a",
-          "identityPoolName": "fitstyle dev",
+          "identityPoolName": "fitstyle",
           "allowUnauthenticatedIdentities": true,
-          "authRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyledevAuth_Role",
-          "authRoleName": "Cognito_fitstyledevAuth_Role",
-          "unauthRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyledevUnauth_Role",
-          "unauthRoleName": "Cognito_fitstyledevUnauth_Role"
+          "authRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyleAuth_Role",
+          "authRoleName": "Cognito_fitstyleAuth_Role",
+          "unauthRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyleUnauth_Role",
+          "unauthRoleName": "Cognito_fitstyleUnauth_Role"
         }
       },
       "storage": {
-        "fitstylec14beb30": {
+        "fitstyle4d778737": {
           "bucketName": "foldedai-fitstyle-dev",
           "region": "us-west-2"
         }

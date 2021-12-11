@@ -7,7 +7,8 @@ import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
-import ai.folded.fitstyle.utils.AwsUtils
+import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
+import ai.folded.fitstyle.utils.MAX_IMAGE_SIZE
 import ai.folded.fitstyle.utils.TRANSFER_RETRIES
 import android.app.Application
 import android.graphics.Bitmap
@@ -16,17 +17,23 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Base64.DEFAULT
-import android.util.Base64.encodeToString
+import android.util.Log
+import androidx.core.graphics.BitmapCompat
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import okhttp3.FormBody
-import java.io.ByteArrayOutputStream
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import java.io.File
 import javax.annotation.Nullable
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.FileOutputStream
+
 
 /**
  * The ViewModel used in [StyleTransferFragment].
@@ -64,7 +71,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                 callStyleTransfer(userId)
             } catch (e: Exception) {
                 // TODO: handle and log error
-                _status.value = Status.FAILED
+                setFailedStatus()
             }
         }
     }
@@ -74,43 +81,30 @@ class StyleTransferViewModel @AssistedInject constructor(
             try {
                 FitStyleApi.retrofitService.cancelStyleTransferTask(it)
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    _status.value = Status.FAILED
-                }
+                setFailedStatus()
             }
         }
     }
 
     private suspend fun callStyleTransfer(userId: String) = withContext(Dispatchers.IO) {
-        val photoBitmap = getBitmapFromUri(styleOptions.photoUri)
-        val styleBitmap = getBitmapFromUri(styleOptions.customStyleUri)
+        val contentFile = getFileRequestBody(getPhoto(), "content")
+        var styleFile: MultipartBody.Part? = null
 
-        val encodedPhoto = if (photoBitmap != null) convertBitmap(photoBitmap) else ""
-        if (encodedPhoto.isEmpty()) {
-            // TODO: handle error
-            cancel()
+        styleOptions.customStyleUri?.let {
+            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style")
         }
 
-        val encodedCustomStyle = if (styleBitmap != null) convertBitmap(styleBitmap) else null
-        if (encodedCustomStyle.isNullOrEmpty() && styleOptions.styleImage?.key.isNullOrEmpty()) {
-            // TODO: handle error
-            cancel()
-        }
-
-        val builder = FormBody.Builder()
-            .add("user_id", userId)
-            .add("content", encodedPhoto);
-
-        if (encodedCustomStyle != null) {
-            builder.add("custom_style", encodedCustomStyle)
-        }
-
-        if (styleOptions.styleImage?.imageName() != null) {
-            builder.add("style_id", styleOptions.styleImage?.imageName()!!)
-        }
+        val textMediaType = "text/plain".toMediaType()
+        val userIdBody = userId.toRequestBody(textMediaType)
+        val styleIdBody: RequestBody? = styleOptions.styleImage?.imageName()?.toRequestBody(textMediaType)
 
         try {
-            val result = FitStyleApi.retrofitService.styleTransfer(builder.build())
+            val result = FitStyleApi.retrofitService.styleTransfer(
+                userIdBody,
+                contentFile!!,
+                styleIdBody,
+                styleFile
+            )
 
             // track current job in progress
             jobId = result.jobId
@@ -122,22 +116,26 @@ class StyleTransferViewModel @AssistedInject constructor(
                     delay(5000)
                     return@retry true
                 }.catch {
-                    withContext(Dispatchers.Main) {
-                        _status.value = Status.FAILED
-                    }
+                    setFailedStatus()
                 }
                 .collect { response ->
-                    val styledImage = styledImageRepository.create(response.requestId, userId)
-                    withContext(Dispatchers.Main) {
-                        _response.value = styledImage
-                        _status.value = Status.SUCCESS
+                    if (response.requestId == null) {
+                        setFailedStatus()
+                    } else {
+                        val styledImage = styledImageRepository.create(response.requestId, userId)
+                        withContext(Dispatchers.Main) {
+                            _response.value = styledImage
+                            _status.value = Status.SUCCESS
+                        }
                     }
                 }
         } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                _status.value = Status.FAILED
-            }
+            setFailedStatus()
         }
+    }
+
+    private suspend fun setFailedStatus() = withContext(Dispatchers.Main) {
+        _status.value = Status.FAILED
     }
 
     private fun getResult(jobId: String): Flow<StyleTransferResultResponse> {
@@ -147,14 +145,29 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
-    private fun convertBitmap(bitmap: Bitmap) : String {
-        return try {
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-            val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
-            encodeToString(byteArray, DEFAULT)
+    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String): MultipartBody.Part? {
+        var bm = bitmap ?: return null
+
+        try {
+            val cachePath = File(getApplication<Application>().cacheDir, CACHE_DIR_CHILD)
+            cachePath.mkdirs()
+
+            val file = File("$cachePath/$fileKey.jpg")
+
+            if (bm.width > MAX_IMAGE_SIZE || bm.height > MAX_IMAGE_SIZE) {
+                bm = resize(bm, MAX_IMAGE_SIZE, MAX_IMAGE_SIZE)
+            }
+
+            FileOutputStream(file).use { out ->
+                bm.compress(Bitmap.CompressFormat.JPEG, 75, out)
+            }
+
+            val imageFileType = "image/*".toMediaType()
+            val requestFile = file.asRequestBody(imageFileType)
+            return MultipartBody.Part.createFormData(fileKey, file.name, requestFile)
         } catch (e: Exception) {
-            ""
+            // TODO: handle exception
+            return null
         }
     }
 
@@ -179,16 +192,32 @@ class StyleTransferViewModel @AssistedInject constructor(
         return null
     }
 
+    private fun resize(image: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        return if (maxHeight > 0 && maxWidth > 0) {
+            val width = image.width
+            val height = image.height
+            val ratioBitmap = width.toFloat() / height.toFloat()
+            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+            var finalWidth = maxWidth
+            var finalHeight = maxHeight
+            if (ratioMax > ratioBitmap) {
+                finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+            } else {
+                finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+            }
+
+            Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+        } else {
+            image
+        }
+    }
+
     fun getPhoto() : Bitmap? {
         return getBitmapFromUri(styleOptions.photoUri)
     }
 
-    fun getStyleImage() : String {
-        return styleOptions.styleImage?.let {
-            AwsUtils.generateUrl(it.key)?.toString() ?: ""
-        } ?: run {
-            styleOptions.customStyleUri?.toString() ?: ""
-        }
+    fun getStyleImageBitmap(): Bitmap? {
+        return getBitmapFromUri(styleOptions.customStyleUri)
     }
 
     fun clearTransferState() {

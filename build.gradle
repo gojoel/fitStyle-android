@@ -2,9 +2,9 @@
 buildscript {
     ext {
         // Sdk and tools
-        compileSdkVersion = 30
+        compileSdkVersion = 31
         minSdkVersion = 21
-        targetSdkVersion = 30
+        targetSdkVersion = 31
 
         // App dependencies
         appCompatVersion = '1.1.0'
@@ -20,7 +20,7 @@ buildscript {
         junitVersion = '4.12'
         kotlinVersion = '1.4.30'
         ktlintVersion = '0.38.1'
-        ktxVersion = '1.0.2'
+        ktxVersion = '1.6.0'
         lifecycleVersion = '2.2.0'
         materialVersion = '1.2.0'
         navigationVersion = '2.3.3'
@@ -45,6 +45,8 @@ buildscript {
         googleServicesVersion = '4.3.10'
         firebaseBomVersion = '28.4.0'
         crashlyticsGradleVersion = '2.7.1'
+        commonsIoVersion = '2.11.0'
+        emoji2_version = "1.0.0"
     }
 
     repositories {

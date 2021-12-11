@@ -7,4 +7,4 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class StyleTransferResultResponse(
     @Json(name = "status") val status: String,
-    @Json(name = "req_id") val requestId: String) : Parcelable
+    @Json(name = "req_id") val requestId: String?) : Parcelable

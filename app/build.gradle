@@ -23,7 +23,7 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
         vectorDrawables.useSupportLibrary true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,9 +34,18 @@ android {
         }
     }
 
+    signingConfigs {
+        signRelease {
+            storeFile file(FITSTYLE_STORE_FILE)
+            storePassword FITSTYLE_STORE_PASS
+            keyAlias FITSTYLE_KEY_ALIAS
+            keyPassword FITSTYLE_KEY_PASS
+        }
+    }
+
     buildTypes {
         debug {
-            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle-dev\""
+            buildConfigField "String", "BUCKET_NAME", localProperties['BUCKET_NAME_DEV']
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL_DEV']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_TEST_PUBLISHABLE_KEY']
         }
@@ -44,8 +53,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signRelease
 
-            buildConfigField "String", "BUCKET_NAME", "\"foldedai-fitstyle\""
+            buildConfigField "String", "BUCKET_NAME", localProperties['BUCKET_NAME']
             buildConfigField "String", "BASE_URL", localProperties['FITSTYLE_BASE_URL']
             buildConfigField "String", "PUBLISHABLE_KEY", localProperties['FITSTYLE_STRIPE_PUBLISHABLE_KEY']
         }
@@ -72,6 +82,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$rootProject.roomVersion"
     kapt "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
     kapt "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"
+    implementation "androidx.preference:preference:$rootProject.appCompatVersion"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
     implementation "androidx.core:core-ktx:$rootProject.ktxVersion"
@@ -102,11 +113,16 @@ dependencies {
     implementation "com.facebook.shimmer:shimmer:$rootProject.shimmerVersion"
     implementation "com.google.android.gms:play-services-wallet:$rootProject.walletVersion"
     implementation "com.stripe:stripe-android:$rootProject.stripeVersion"
+    implementation "commons-io:commons-io:$rootProject.commonsIoVersion"
 
     // Firebase
     implementation platform("com.google.firebase:firebase-bom:$rootProject.firebaseBomVersion")
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
+
+    implementation("androidx.emoji2:emoji2:$emoji2_version")
+    implementation("androidx.emoji2:emoji2-views:$emoji2_version")
+    implementation("androidx.emoji2:emoji2-views-helper:$emoji2_version")
 
     // Testing dependencies
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$rootProject.hiltVersion"
