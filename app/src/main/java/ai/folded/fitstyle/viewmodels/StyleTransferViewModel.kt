@@ -2,6 +2,7 @@ package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.api.StyleTransferResultResponse
+import ai.folded.fitstyle.api.StyleTransferStatus
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
@@ -38,6 +39,8 @@ import java.io.FileOutputStream
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
+
+private const val REQUEST_DELAY = 5000L
 
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
@@ -110,28 +113,43 @@ class StyleTransferViewModel @AssistedInject constructor(
             jobId = result.jobId
 
             // continuously attempt to get the results with a retry limit and backoff delay
-            getResult(result.jobId)
-                .flowOn(Dispatchers.Default)
-                .retry (retries = TRANSFER_RETRIES) {
-                    delay(5000)
-                    return@retry true
-                }.catch {
-                    setFailedStatus()
-                }
-                .collect { response ->
-                    if (response.requestId == null) {
-                        setFailedStatus()
-                    } else {
-                        val styledImage = styledImageRepository.create(response.requestId, userId)
-                        withContext(Dispatchers.Main) {
-                            _response.value = styledImage
-                            _status.value = Status.SUCCESS
-                        }
-                    }
-                }
+            pollResult(userId)
+
         } catch (e: Exception) {
+            //TODO: log error
             setFailedStatus()
         }
+    }
+
+    private suspend fun pollResult(userId: String, retries: Int = 0) {
+        if (jobId == null || retries >= TRANSFER_RETRIES) {
+            setFailedStatus()
+            return
+        }
+
+        getResult(jobId ?: return)
+            .flowOn(Dispatchers.Default)
+            .catch { error ->
+                //TODO: log error
+                setFailedStatus()
+            }
+            .collect { response ->
+                if (response.status == StyleTransferStatus.INCOMPLETE) {
+                    delay(REQUEST_DELAY)
+                    pollResult(userId, retries + 1)
+                    return@collect
+                }
+
+                if (response.requestId == null) {
+                    setFailedStatus()
+                } else {
+                    val styledImage = styledImageRepository.create(response.requestId, userId)
+                    withContext(Dispatchers.Main) {
+                        _response.value = styledImage
+                        _status.value = Status.SUCCESS
+                    }
+                }
+            }
     }
 
     private suspend fun setFailedStatus() = withContext(Dispatchers.Main) {
