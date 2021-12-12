@@ -140,7 +140,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                     return@collect
                 }
 
-                if (response.requestId == null) {
+                if (response.status == StyleTransferStatus.FAILED || response.requestId == null) {
                     setFailedStatus()
                 } else {
                     val styledImage = styledImageRepository.create(response.requestId, userId)

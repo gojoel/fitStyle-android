@@ -14,5 +14,8 @@ enum class StyleTransferStatus {
     INCOMPLETE,
 
     @Json(name = "complete")
-    COMPLETE
+    COMPLETE,
+
+    @Json(name = "failed")
+    FAILED
 }
