@@ -124,10 +124,18 @@ class StyledImageFragment: Fragment() {
         }
 
         binding.purchaseButton.setOnClickListener {
+            context?.let {
+                FirebaseAnalytics.getInstance(it).logEvent("clicked_purchase_button", null)
+            }
+
             onPurchase()
         }
 
         binding.shareButton.setOnClickListener {
+            context?.let {
+                FirebaseAnalytics.getInstance(it).logEvent("clicked_share_button", null)
+            }
+
             binding.shareButton.isEnabled = false
             binding.progressBar.visibility = View.VISIBLE
 
