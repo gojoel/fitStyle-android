@@ -56,8 +56,8 @@ class PreferenceSettingsFragment : PreferenceFragmentCompat() {
         val uid = userId.substring(index + 1)
         val splitComponents = uid.split("-")
 
-        return if (splitComponents.isNotEmpty()) {
-            splitComponents[0]
+        return if (splitComponents.isNotEmpty() && splitComponents.size > 1) {
+            splitComponents.take(splitComponents.size - 1).joinToString("-")
         } else {
             ""
         }
