@@ -1,11 +1,11 @@
 package ai.folded.fitstyle.viewmodels
 
-import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.PaymentRepository
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
+import ai.folded.fitstyle.utils.AnalyticsManager
 import android.app.Application
 import android.content.ContentValues
 import android.os.Build
@@ -18,14 +18,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -38,7 +37,8 @@ class StyledImageViewModel @AssistedInject constructor(
     @Assisted val imageId: String,
     private val paymentRepository: PaymentRepository,
     private val styledImageRepository: StyledImageRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val analyticsManager: AnalyticsManager,
 ) : AndroidViewModel(application) {
 
     private val collection =
@@ -81,7 +81,7 @@ class StyledImageViewModel @AssistedInject constructor(
                     val file = downloadS3Image(styledImage)
                     _shareableImage.value = file
                 } catch (e: Exception) {
-                    // TODO: handle exception
+                    analyticsManager.logError(AnalyticsManager.FitstyleError.SHARE, e.localizedMessage)
                     _shareableImage.value = null
                 }
             }
@@ -110,7 +110,7 @@ class StyledImageViewModel @AssistedInject constructor(
             val contentValues = ContentValues().apply {
                 put(MediaStore.Images.Media.DISPLAY_NAME, styledImage.requestId)
                 put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { //this one
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     put(MediaStore.Images.Media.IS_PENDING, 1)
                 }
             }
@@ -135,7 +135,7 @@ class StyledImageViewModel @AssistedInject constructor(
                 }
             }
         } catch (e: Exception) {
-            // TODO: handle exception
+            analyticsManager.logError(AnalyticsManager.FitstyleError.DOWNLOAD, e.localizedMessage)
             withContext(Dispatchers.Main) {
                 _downloadStatus.value = Status.FAILED
             }
@@ -181,6 +181,7 @@ class StyledImageViewModel @AssistedInject constructor(
                 paymentStatus.postValue(Status.SUCCESS)
             },
             onFailure = {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.PAYMENT, it.localizedMessage)
                 paymentStatus.postValue(Status.FAILED)
             }
         )
@@ -209,7 +210,7 @@ class StyledImageViewModel @AssistedInject constructor(
             successful = true
 
         } catch (e: Exception) {
-            // TODO: log exception
+            analyticsManager.logError(AnalyticsManager.FitstyleError.WATERMARK, e.localizedMessage)
         }
 
         paymentProgress.postValue(false)
@@ -218,6 +219,7 @@ class StyledImageViewModel @AssistedInject constructor(
             if (successful) {
                 Status.SUCCESS
             } else {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.WATERMARK, "Failed to remove watermark")
                 Status.FAILED
             }
         )

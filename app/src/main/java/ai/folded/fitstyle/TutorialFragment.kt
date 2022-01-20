@@ -3,6 +3,7 @@ package ai.folded.fitstyle
 import ai.folded.fitstyle.data.Tutorial
 import ai.folded.fitstyle.databinding.FragmentTutorialBinding
 import ai.folded.fitstyle.databinding.ItemTutorialBinding
+import ai.folded.fitstyle.utils.AnalyticsManager
 import ai.folded.fitstyle.utils.PREF_COMPLETED_TUTORIAL
 import android.content.Context
 import android.os.Bundle
@@ -15,11 +16,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class TutorialFragment: Fragment() {
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: TutorialAdapter
     private lateinit var callback: ViewPager2.OnPageChangeCallback
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,13 +57,17 @@ class TutorialFragment: Fragment() {
                 continueButton.setOnClickListener {
                     val lastPage = viewPager.currentItem == adapter.tutorialPages.size - 1
                     if (lastPage) {
+                        analyticsManager.logEvent(AnalyticsManager.FitstyleEvent.COMPLETED_TUTORIAL)
                         completeTutorial()
                     } else {
                         viewPager.setCurrentItem(viewPager.currentItem + 1, true)
                     }
                 }
 
-                skipButton.setOnClickListener { completeTutorial() }
+                skipButton.setOnClickListener {
+                    analyticsManager.logEvent(AnalyticsManager.FitstyleEvent.SKIPPED_TUTORIAL)
+                    completeTutorial()
+                }
 
                 backButton.setOnClickListener { onBackPressed() }
             }

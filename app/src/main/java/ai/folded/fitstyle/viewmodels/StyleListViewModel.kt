@@ -1,6 +1,7 @@
 package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.data.StyleImage
+import ai.folded.fitstyle.utils.AnalyticsManager
 import ai.folded.fitstyle.utils.BUCKET_PUBLIC_PREFIX
 import ai.folded.fitstyle.utils.STYLE_IMAGES_PATH
 import androidx.lifecycle.LiveData
@@ -19,6 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class StyleListViewModel @Inject internal constructor(
+    private val analyticsManager: AnalyticsManager
 ) : ViewModel() {
 
     private val _images = MutableLiveData<List<StyleImage>>()
@@ -36,7 +38,7 @@ class StyleListViewModel @Inject internal constructor(
                 val result = fetchImages()
                 _images.value = result
             } catch (e: StorageException) {
-                // TODO: handle and log error
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STORAGE, e.localizedMessage)
             }
         }
     }

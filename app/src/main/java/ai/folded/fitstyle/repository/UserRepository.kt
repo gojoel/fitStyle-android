@@ -1,5 +1,6 @@
 package ai.folded.fitstyle.repository
 
+import ai.folded.fitstyle.utils.AnalyticsManager
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.result.AuthSessionResult
 import com.amplifyframework.core.Amplify
@@ -10,7 +11,9 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Singleton
-class UserRepository @Inject constructor() {
+class UserRepository @Inject constructor(
+    private val analyticsManager: AnalyticsManager
+) {
     suspend fun getUserId() : String = suspendCoroutine { continuation ->
         Amplify.Auth.fetchAuthSession(
             {
@@ -20,13 +23,13 @@ class UserRepository @Inject constructor() {
                         continuation.resume(session.identityId.value ?: "")
                     }
                     AuthSessionResult.Type.FAILURE -> {
-                        //  TODO: log failure to retrieve identity id
+                        analyticsManager.logError(AnalyticsManager.FitstyleError.USER, "Failed to retrieve user")
                         continuation.resume("")
                     }
                 }
             },
             {
-                // TODO: log failure to fetch session
+                analyticsManager.logError(AnalyticsManager.FitstyleError.USER, it.localizedMessage)
                 continuation.resumeWithException(it)
             }
         )

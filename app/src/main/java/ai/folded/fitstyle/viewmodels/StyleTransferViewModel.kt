@@ -8,6 +8,7 @@ import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
+import ai.folded.fitstyle.utils.AnalyticsManager
 import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
 import ai.folded.fitstyle.utils.MAX_IMAGE_SIZE
 import ai.folded.fitstyle.utils.TRANSFER_RETRIES
@@ -18,8 +19,6 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
-import androidx.core.graphics.BitmapCompat
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -28,12 +27,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import java.io.File
-import javax.annotation.Nullable
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.io.FileOutputStream
+import javax.annotation.Nullable
 
 
 /**
@@ -46,7 +45,8 @@ class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions,
     private val styledImageRepository: StyledImageRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val analyticsManager: AnalyticsManager
 ) : AndroidViewModel(application) {
 
     @Volatile
@@ -73,7 +73,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                 val userId = userRepository.getUserId()
                 callStyleTransfer(userId)
             } catch (e: Exception) {
-                // TODO: handle and log error
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 setFailedStatus()
             }
         }
@@ -84,6 +84,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             try {
                 FitStyleApi.retrofitService.cancelStyleTransferTask(it)
             } catch (e: Exception) {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 setFailedStatus()
             }
         }
@@ -116,7 +117,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             pollResult(userId)
 
         } catch (e: Exception) {
-            //TODO: log error
+            analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
             setFailedStatus()
         }
     }
@@ -130,7 +131,7 @@ class StyleTransferViewModel @AssistedInject constructor(
         getResult(jobId ?: return)
             .flowOn(Dispatchers.Default)
             .catch { error ->
-                //TODO: log error
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, error.localizedMessage)
                 setFailedStatus()
             }
             .collect { response ->
@@ -184,7 +185,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             val requestFile = file.asRequestBody(imageFileType)
             return MultipartBody.Part.createFormData(fileKey, file.name, requestFile)
         } catch (e: Exception) {
-            // TODO: handle exception
+            analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
             return null
         }
     }
@@ -203,6 +204,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                     )
                 }
             } catch (e: Exception) {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 null
             }
         }

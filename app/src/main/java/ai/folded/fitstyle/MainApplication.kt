@@ -1,5 +1,6 @@
 package ai.folded.fitstyle
 
+import ai.folded.fitstyle.utils.AnalyticsManager
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
@@ -26,7 +27,7 @@ class MainApplication : Application() {
 
             Amplify.configure(applicationContext)
         } catch (error: AmplifyException) {
-            // TODO: log failure to initialize amplify
+            AnalyticsManager(this).logError(AnalyticsManager.FitstyleError.AMPLIFY, error.localizedMessage)
         }
     }
 }

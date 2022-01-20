@@ -2,6 +2,7 @@ package ai.folded.fitstyle
 
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.databinding.FragmentStyledImageBinding
+import ai.folded.fitstyle.utils.AnalyticsManager
 import ai.folded.fitstyle.utils.COUNTRY_CODE
 import ai.folded.fitstyle.utils.MERCHANT
 import ai.folded.fitstyle.utils.STYLED_IMG_VIEW_SRC_TRANSFER
@@ -17,15 +18,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import androidx.core.content.FileProvider
-import androidx.databinding.library.BuildConfig
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -35,6 +33,8 @@ import com.bumptech.glide.request.target.Target
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StyledImageFragment: Fragment() {
@@ -43,6 +43,9 @@ class StyledImageFragment: Fragment() {
 
     @Inject
     lateinit var styledImageViewModelFactory: StyledImageViewModelFactory
+
+    @Inject
+    lateinit var analyticsManager: AnalyticsManager
 
     lateinit var binding: FragmentStyledImageBinding
 
@@ -125,7 +128,7 @@ class StyledImageFragment: Fragment() {
 
         binding.purchaseButton.setOnClickListener {
             context?.let {
-                FirebaseAnalytics.getInstance(it).logEvent("clicked_purchase_button", null)
+                analyticsManager.logEvent(AnalyticsManager.FitstyleEvent.TAPPED_PURCHASE)
             }
 
             onPurchase()
@@ -133,7 +136,7 @@ class StyledImageFragment: Fragment() {
 
         binding.shareButton.setOnClickListener {
             context?.let {
-                FirebaseAnalytics.getInstance(it).logEvent("clicked_share_button", null)
+                analyticsManager.logEvent(AnalyticsManager.FitstyleEvent.TAPPED_SHARE)
             }
 
             binding.shareButton.isEnabled = false
@@ -181,6 +184,7 @@ class StyledImageFragment: Fragment() {
                         target: Target<Drawable>?,
                         isFirstResource: Boolean
                     ): Boolean {
+                        analyticsManager.logError(AnalyticsManager.FitstyleError.STYLED_IMAGE, e?.localizedMessage)
                         showLoadingImage(binding.shimmerView, false)
                         return false
                     }
@@ -197,7 +201,6 @@ class StyledImageFragment: Fragment() {
                     }
                 })
                 .into(binding.resultImageView)
-
 
             if (it.purchased) {
                 binding.purchaseButton.visibility = View.GONE
@@ -280,7 +283,10 @@ class StyledImageFragment: Fragment() {
     ) {
         when(paymentSheetResult) {
             is PaymentSheetResult.Canceled -> {}
-            is PaymentSheetResult.Failed -> { showPaymentFailureDialog() }
+            is PaymentSheetResult.Failed -> {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.PAYMENT, paymentSheetResult.error.localizedMessage)
+                showPaymentFailureDialog()
+            }
             is PaymentSheetResult.Completed -> {
                 styledImageViewModel.removeWatermark(args.styledImage).observe(this) { status ->
                     if (status == Status.SUCCESS) {
