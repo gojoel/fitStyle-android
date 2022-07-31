@@ -89,23 +89,12 @@
 
             <com.google.android.material.button.MaterialButton
                 style="@style/Widget.MaterialComponents.Button.Icon"
-                android:id="@+id/purchase_button"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/button_height"
-                android:text="@string/remove_watermark"
-                app:icon="@drawable/ic_currency"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/share_button"/>
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/Widget.MaterialComponents.Button.Icon"
                 android:id="@+id/retry_button"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/button_height"
                 android:text="@string/create_another"
                 app:icon="@drawable/ic_arrow_back"
-                app:layout_constraintTop_toBottomOf="@+id/purchase_button"
+                app:layout_constraintTop_toBottomOf="@+id/share_button"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 

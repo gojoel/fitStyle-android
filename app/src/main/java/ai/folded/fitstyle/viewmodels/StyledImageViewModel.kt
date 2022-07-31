@@ -1,6 +1,5 @@
 package ai.folded.fitstyle.viewmodels
 
-import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.PaymentRepository
 import ai.folded.fitstyle.repository.StyledImageRepository
@@ -15,7 +14,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -27,24 +25,16 @@ import java.util.*
 class StyledImageViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val imageId: String,
-    private val paymentRepository: PaymentRepository,
     private val styledImageRepository: StyledImageRepository,
-    private val userRepository: UserRepository,
     private val analyticsManager: AnalyticsManager,
 ) : AndroidViewModel(application) {
 
     val styledImage = MutableLiveData<StyledImage>()
 
-    private val _downloadStatus = MutableLiveData<Status?>()
-
-    private val _shareableImage = MutableLiveData<File?>()
+    private var _shareableImage = MutableLiveData<File?>()
 
     val shareableImage: LiveData<File?>
         get() = _shareableImage
-
-    val paymentProgress = MutableLiveData<Boolean>()
-
-    val paymentStatus = MutableLiveData<Status>()
 
     init {
         updateStyledImage()
@@ -62,8 +52,7 @@ class StyledImageViewModel @AssistedInject constructor(
         viewModelScope.launch {
             styledImage.value?.let { styledImage ->
                 try {
-                    val userId = userRepository.getUserId()
-                    downloadS3Image(userId, styledImage) {
+                    downloadS3Image(styledImage) {
                         _shareableImage.value = it
                     }
                 } catch (e: Exception) {
@@ -78,7 +67,7 @@ class StyledImageViewModel @AssistedInject constructor(
         _shareableImage.value = null
     }
 
-    private fun downloadS3Image(userId: String, styledImage: StyledImage, callback: ((file: File?) -> Unit)) {
+    private fun downloadS3Image(styledImage: StyledImage, callback: ((file: File?) -> Unit)) {
         try {
             val file = styledImageRepository.createImageFile(getApplication(), styledImage)
             if (file.exists()) {
@@ -88,7 +77,6 @@ class StyledImageViewModel @AssistedInject constructor(
                     .accessLevel(StorageAccessLevel.PRIVATE)
                     .build()
 
-                val userId = userId
                 val key = styledImage.downloadKey()
 
                 Amplify.Storage.downloadFile(key, file, options,
@@ -104,62 +92,6 @@ class StyledImageViewModel @AssistedInject constructor(
         } catch (e: IOException) {
             callback.invoke(null)
         }
-    }
-
-    fun preparePaymentRequest() = liveData {
-        paymentProgress.postValue(true)
-        paymentStatus.postValue(Status.WAITING)
-
-        val userId = userRepository.getUserId();
-        val paymentResponse = paymentRepository.createWatermarkPayment(userId, styledImage.value!!.requestId).single()
-
-        paymentResponse.fold(
-            onSuccess = {
-                paymentStatus.postValue(Status.SUCCESS)
-            },
-            onFailure = {
-                analyticsManager.logError(AnalyticsManager.FitstyleError.PAYMENT, it.localizedMessage)
-                paymentStatus.postValue(Status.FAILED)
-            }
-        )
-
-        paymentProgress.postValue(false)
-        emit(paymentResponse.getOrNull())
-    }
-
-    fun removeWatermark(styledImage: StyledImage) = liveData {
-        paymentProgress.postValue(true)
-
-        var successful = false
-        try {
-            val userId = userRepository.getUserId();
-            paymentRepository.removeWatermark(userId, styledImage.requestId)
-
-            val file = styledImageRepository.createImageFile(getApplication(), styledImage)
-            if (file.exists()) {
-                file.delete()
-            }
-
-            styledImage.updatedAt = Date().time
-            styledImage.purchased = true
-            styledImageRepository.update(styledImage)
-
-            successful = true
-
-        } catch (e: Exception) {
-            analyticsManager.logError(AnalyticsManager.FitstyleError.WATERMARK, e.localizedMessage)
-        }
-
-        paymentProgress.postValue(false)
-
-        emit(
-            if (successful) {
-                Status.SUCCESS
-            } else {
-                analyticsManager.logError(AnalyticsManager.FitstyleError.WATERMARK, "Failed to remove watermark")
-                Status.FAILED
-            }
-        )
     }
 
     companion object {
