@@ -1,5 +1,6 @@
 package ai.folded.fitstyle.utils
 
+import ai.folded.fitstyle.BuildConfig
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.os.bundleOf
@@ -35,6 +36,10 @@ class AnalyticsManager @Inject constructor(
     private var firebaseAnalytics : FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     fun logEvent(event: FitstyleEvent) {
+        if (BuildConfig.DEBUG) {
+            return
+        }
+
         getUserId {
             firebaseAnalytics.logEvent("android_event", bundleOf(
                 "type" to event.type,
@@ -44,6 +49,10 @@ class AnalyticsManager @Inject constructor(
     }
 
     fun logError(error: FitstyleError, description: String?) {
+        if (BuildConfig.DEBUG) {
+            return
+        }
+        
         getUserId {
             firebaseAnalytics.logEvent("android_error", bundleOf(
                 "type" to error.type,
