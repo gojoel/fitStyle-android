@@ -22,28 +22,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/shimmer_view"
-            android:layout_height="0dp"
-            android:layout_width="0dp"
-            android:layout_margin="@dimen/margin_normal"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar"
-            app:layout_constraintBottom_toTopOf="@+id/button_layout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardCornerRadius="16dp"/>
-
-        </com.facebook.shimmer.ShimmerFrameLayout>
-
-        <FrameLayout
-            android:id="@+id/result_container"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/margin_normal"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginEnd="@dimen/margin_normal"
             app:layout_constraintVertical_bias="0"
@@ -55,15 +38,40 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/result_image_view"
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmer_view"
+                android:layout_height="0dp"
+                android:layout_width="0dp"
+                app:layout_constraintDimensionRatio="H,4:5"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="16dp"/>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <FrameLayout
+                android:id="@+id/result_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:adjustViewBounds="true"
-                app:shapeAppearanceOverlay="@style/roundedCorners"/>
-        </FrameLayout>
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/result_image_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    app:shapeAppearanceOverlay="@style/roundedCorners"/>
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/button_layout"
@@ -72,7 +80,7 @@
             android:layout_margin="@dimen/margin_normal"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintVertical_chainStyle="packed"
-            app:layout_constraintTop_toBottomOf="@+id/result_container"
+            app:layout_constraintTop_toBottomOf="@+id/container"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
