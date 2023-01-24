@@ -34,7 +34,7 @@ buildscript {
         testExtJunit = '1.1.0'
         uiAutomatorVersion = '2.2.0'
         viewPagerVersion = '1.0.0'
-        workVersion = '2.1.0'
+        workVersion = '2.7.0'
         kotlin_version = '1.3.72'
         moshiVersion = "1.9.3"
         amplifyVersion = '1.17.1'
