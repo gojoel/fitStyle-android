@@ -8,10 +8,7 @@ import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
-import ai.folded.fitstyle.utils.AnalyticsManager
-import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
-import ai.folded.fitstyle.utils.MAX_IMAGE_SIZE
-import ai.folded.fitstyle.utils.TRANSFER_RETRIES
+import ai.folded.fitstyle.utils.*
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -95,7 +92,7 @@ class StyleTransferViewModel @AssistedInject constructor(
         var styleFile: MultipartBody.Part? = null
 
         styleOptions.customStyleUri?.let {
-            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style")
+            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style", false)
         }
 
         val textMediaType = "text/plain".toMediaType()
@@ -164,7 +161,7 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String): MultipartBody.Part? {
+    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String, content: Boolean = true): MultipartBody.Part? {
         var bm = bitmap ?: return null
 
         try {
@@ -173,8 +170,14 @@ class StyleTransferViewModel @AssistedInject constructor(
 
             val file = File("$cachePath/$fileKey.jpg")
 
-            if (bm.width > MAX_IMAGE_SIZE || bm.height > MAX_IMAGE_SIZE) {
-                bm = resize(bm, MAX_IMAGE_SIZE, MAX_IMAGE_SIZE)
+            val maxSize = if (content) {
+                MAX_IMAGE_SIZE
+            } else {
+                MAX_STYLE_IMAGE_SIZE
+            }
+
+            if (bm.width > maxSize || bm.height > maxSize) {
+                bm = resize(bm, maxSize, maxSize)
             }
 
             FileOutputStream(file).use { out ->
