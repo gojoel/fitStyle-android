@@ -8,7 +8,7 @@
 <p align="center">Fitstyle is an app that allows users to merge photos and art to create styled images. This app showcases modern Android development with Kotlin, Coroutines, Flow, Jetpack, Hilt, Material Design and an MVVM architecture.</p>
 
 <p align="center">
-<img src="previews/screenshot.png"/>
+<img src="assets/screenshot.png"/>
 </p>
 
 ## Tech stack 
