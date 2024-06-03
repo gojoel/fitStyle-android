@@ -2,14 +2,13 @@ package ai.folded.fitstyle.viewmodels
 
 import ai.folded.fitstyle.api.FitStyleApi
 import ai.folded.fitstyle.api.StyleTransferResultResponse
+import ai.folded.fitstyle.api.StyleTransferStatus
 import ai.folded.fitstyle.data.Status
 import ai.folded.fitstyle.data.StyleOptions
 import ai.folded.fitstyle.data.StyledImage
 import ai.folded.fitstyle.repository.StyledImageRepository
 import ai.folded.fitstyle.repository.UserRepository
-import ai.folded.fitstyle.utils.CACHE_DIR_CHILD
-import ai.folded.fitstyle.utils.MAX_IMAGE_SIZE
-import ai.folded.fitstyle.utils.TRANSFER_RETRIES
+import ai.folded.fitstyle.utils.*
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder.createSource
@@ -17,8 +16,6 @@ import android.graphics.ImageDecoder.decodeBitmap
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
-import androidx.core.graphics.BitmapCompat
 import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -27,23 +24,26 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import java.io.File
-import javax.annotation.Nullable
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.io.FileOutputStream
+import javax.annotation.Nullable
 
 
 /**
  * The ViewModel used in [StyleTransferFragment].
  */
 
+private const val REQUEST_DELAY = 5000L
+
 class StyleTransferViewModel @AssistedInject constructor(
     application: Application,
     @Assisted val styleOptions: StyleOptions,
     private val styledImageRepository: StyledImageRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val analyticsManager: AnalyticsManager
 ) : AndroidViewModel(application) {
 
     @Volatile
@@ -70,7 +70,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                 val userId = userRepository.getUserId()
                 callStyleTransfer(userId)
             } catch (e: Exception) {
-                // TODO: handle and log error
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 setFailedStatus()
             }
         }
@@ -81,6 +81,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             try {
                 FitStyleApi.retrofitService.cancelStyleTransferTask(it)
             } catch (e: Exception) {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 setFailedStatus()
             }
         }
@@ -91,7 +92,7 @@ class StyleTransferViewModel @AssistedInject constructor(
         var styleFile: MultipartBody.Part? = null
 
         styleOptions.customStyleUri?.let {
-            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style")
+            styleFile = getFileRequestBody(getStyleImageBitmap(), "custom_style", false)
         }
 
         val textMediaType = "text/plain".toMediaType()
@@ -110,28 +111,43 @@ class StyleTransferViewModel @AssistedInject constructor(
             jobId = result.jobId
 
             // continuously attempt to get the results with a retry limit and backoff delay
-            getResult(result.jobId)
-                .flowOn(Dispatchers.Default)
-                .retry (retries = TRANSFER_RETRIES) {
-                    delay(5000)
-                    return@retry true
-                }.catch {
-                    setFailedStatus()
-                }
-                .collect { response ->
-                    if (response.requestId == null) {
-                        setFailedStatus()
-                    } else {
-                        val styledImage = styledImageRepository.create(response.requestId, userId)
-                        withContext(Dispatchers.Main) {
-                            _response.value = styledImage
-                            _status.value = Status.SUCCESS
-                        }
-                    }
-                }
+            pollResult(userId)
+
         } catch (e: Exception) {
+            analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
             setFailedStatus()
         }
+    }
+
+    private suspend fun pollResult(userId: String, retries: Int = 0) {
+        if (jobId == null || retries >= TRANSFER_RETRIES) {
+            setFailedStatus()
+            return
+        }
+
+        getResult(jobId ?: return)
+            .flowOn(Dispatchers.Default)
+            .catch { error ->
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, error.localizedMessage)
+                setFailedStatus()
+            }
+            .collect { response ->
+                if (response.status == StyleTransferStatus.INCOMPLETE) {
+                    delay(REQUEST_DELAY)
+                    pollResult(userId, retries + 1)
+                    return@collect
+                }
+
+                if (response.status == StyleTransferStatus.FAILED || response.requestId == null) {
+                    setFailedStatus()
+                } else {
+                    val styledImage = styledImageRepository.create(response.requestId, userId)
+                    withContext(Dispatchers.Main) {
+                        _response.value = styledImage
+                        _status.value = Status.SUCCESS
+                    }
+                }
+            }
     }
 
     private suspend fun setFailedStatus() = withContext(Dispatchers.Main) {
@@ -145,7 +161,7 @@ class StyleTransferViewModel @AssistedInject constructor(
         }
     }
 
-    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String): MultipartBody.Part? {
+    private fun getFileRequestBody(bitmap: Bitmap?, fileKey: String, content: Boolean = true): MultipartBody.Part? {
         var bm = bitmap ?: return null
 
         try {
@@ -154,8 +170,14 @@ class StyleTransferViewModel @AssistedInject constructor(
 
             val file = File("$cachePath/$fileKey.jpg")
 
-            if (bm.width > MAX_IMAGE_SIZE || bm.height > MAX_IMAGE_SIZE) {
-                bm = resize(bm, MAX_IMAGE_SIZE, MAX_IMAGE_SIZE)
+            val maxSize = if (content) {
+                MAX_IMAGE_SIZE
+            } else {
+                MAX_STYLE_IMAGE_SIZE
+            }
+
+            if (bm.width > maxSize || bm.height > maxSize) {
+                bm = resize(bm, maxSize, maxSize)
             }
 
             FileOutputStream(file).use { out ->
@@ -166,7 +188,7 @@ class StyleTransferViewModel @AssistedInject constructor(
             val requestFile = file.asRequestBody(imageFileType)
             return MultipartBody.Part.createFormData(fileKey, file.name, requestFile)
         } catch (e: Exception) {
-            // TODO: handle exception
+            analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
             return null
         }
     }
@@ -185,6 +207,7 @@ class StyleTransferViewModel @AssistedInject constructor(
                     )
                 }
             } catch (e: Exception) {
+                analyticsManager.logError(AnalyticsManager.FitstyleError.STYLE_TRANSFER, e.localizedMessage)
                 null
             }
         }

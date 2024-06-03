@@ -1,20 +1,13 @@
 package ai.folded.fitstyle
 
 import ai.folded.fitstyle.databinding.FragmentUploadPhotoBinding
-import ai.folded.fitstyle.utils.PermissionUtils
+import ai.folded.fitstyle.utils.PhotoUtils
 import ai.folded.fitstyle.viewmodels.UploadPhotoViewModel
 import ai.folded.fitstyle.viewmodels.UploadPhotoViewModelFactory
-import android.Manifest
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
@@ -38,28 +31,7 @@ class UploadPhotoFragment : Fragment() {
         UploadPhotoViewModel.provideFactory(uploadPhotoViewModelFactory, args.styleOptions)
     }
 
-    private val requestPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) launchGallery()
-            else  {
-                if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    // user has denied permission and selected "Never ask again"
-                    showPermissionDeniedWithoutRetry()
-                } else {
-                    showPermissionDeniedDialog()
-                }
-            }
-        }
-
-    private val openGallery =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-                val selectedImageUri: Uri? = result.data?.data
-                if (selectedImageUri != null) {
-                    uploadPhotoViewModel.onPhotoUploaded(selectedImageUri)
-                }
-            }
-        }
+    private var photoUtils = PhotoUtils(this)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,12 +50,8 @@ class UploadPhotoFragment : Fragment() {
         }
 
         binding.uploadPhotoButton.setOnClickListener {
-            activity?.let {
-                if (PermissionUtils.isStoragePermissionGranted(it)) {
-                    launchGallery()
-                } else {
-                    requestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                }
+            photoUtils.accessGallery {
+                uploadPhotoViewModel.onPhotoUploaded(it)
             }
         }
 
@@ -97,47 +65,5 @@ class UploadPhotoFragment : Fragment() {
 
         setHasOptionsMenu(true)
         return binding.root
-    }
-
-    private fun launchGallery() {
-        openGallery.launch(
-            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        )
-    }
-
-    private fun showPermissionDeniedDialog() {
-        val dialog = SimpleDialogFragment.newInstance(
-            R.string.gallery_permission_rationale,
-            R.string.permission_denied_title,
-            R.drawable.ic_warning,
-            R.string.ok,
-        )
-
-        dialog.positiveButtonClick.observe(this) {
-            dialog.dismiss()
-        }
-
-        dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
-    }
-
-    private fun showPermissionDeniedWithoutRetry() {
-        val dialog = SimpleDialogFragment.newInstance(
-            R.string.gallery_permission_settings_access,
-            R.string.permission_denied_title,
-            R.drawable.ic_warning,
-            R.string.ok,
-        )
-
-        dialog.positiveButtonClick.observe(this) {
-            dialog.dismiss()
-            startActivity(
-                Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:" + BuildConfig.APPLICATION_ID)
-                )
-            )
-        }
-
-        dialog.show(childFragmentManager, SimpleDialogFragment.TAG)
     }
 }

@@ -34,5 +34,41 @@
         }
       }
     }
+  },
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-fitstyle-prod-165230-authRole",
+      "UnauthRoleArn": "arn:aws:iam::879969738468:role/amplify-fitstyle-prod-165230-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::879969738468:role/amplify-fitstyle-prod-165230-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-fitstyle-prod-165230-deployment",
+      "UnauthRoleName": "amplify-fitstyle-prod-165230-unauthRole",
+      "StackName": "amplify-fitstyle-prod-165230",
+      "StackId": "arn:aws:cloudformation:us-east-2:879969738468:stack/amplify-fitstyle-prod-165230/a4eaeb10-5acc-11ec-ad24-0a342ccdf0c8",
+      "AmplifyAppId": "dbjef3qojelc"
+    },
+    "categories": {
+      "auth": {
+        "fitstyle2801560a": {
+          "userPoolId": "us-east-2_vEI6WUIL1",
+          "userPoolName": "fitstyle-prod",
+          "webClientId": "heq8timdm65penn82i4l8njep",
+          "nativeClientId": "heq8timdm65penn82i4l8njep",
+          "identityPoolId": "us-east-2:6666840b-923f-4c9e-8656-ecf89876d31a",
+          "identityPoolName": "fitstyle",
+          "allowUnauthenticatedIdentities": true,
+          "authRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyleAuth_Role",
+          "authRoleName": "Cognito_fitstyleAuth_Role",
+          "unauthRoleArn": "arn:aws:iam::879969738468:role/Cognito_fitstyleUnauth_Role",
+          "unauthRoleName": "Cognito_fitstyleUnauth_Role"
+        }
+      },
+      "storage": {
+        "fitstyle4d778737": {
+          "bucketName": "foldedai-fitstyle",
+          "region": "us-west-2"
+        }
+      }
+    }
   }
 }

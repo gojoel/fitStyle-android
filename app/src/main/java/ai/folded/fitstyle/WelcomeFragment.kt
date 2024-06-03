@@ -18,7 +18,7 @@ class WelcomeFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentWelcomeBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
